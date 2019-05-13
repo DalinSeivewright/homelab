@@ -104,9 +104,9 @@ then
     echo "Setting up hostname"
     echo "${HOSTNAME}" | tee ${FILEMOUNTPATH}/etc/hostname > /dev/null
 
-    sed -i 's/127.0.1.1/# 127.0.1.1/' /etc/hosts
-    echo "# modified by logichromatic" | tee --append /etc/ssh/sshd_config > /dev/null
-    echo "127.0.1.1 ${HOSTNAME}" | tee --append /etc/hosts > /dev/null
+    sed -i 's/127.0.1.1/# 127.0.1.1/' ${FILEMOUNTPATH}/etc/hosts
+    echo "# modified by logichromatic" | tee --append ${FILEMOUNTPATH}/etc/hosts > /dev/null
+    echo "127.0.1.1 ${HOSTNAME}" | tee --append ${FILEMOUNTPATH}/etc/hosts > /dev/null
   fi
 
   if [ -f ./install.sh ]; then
