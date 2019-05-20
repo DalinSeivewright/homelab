@@ -1,0 +1,21 @@
+- name: "Check if user exists."
+  getent:
+    database: passwd
+    key: "{{ default_user }}"
+    fail_key: False
+
+- name: "Kill Processes.  RIP."
+  shell: "pkill --signal KILL -u {{ default_user }}"
+  when: getent_passwd[default_user] is not none
+
+- name: "Remove Default User"
+  user:
+    name: "{{ default_user }}"
+    state: absent
+  when: getent_passwd[default_user] is not none
+
+- name: "Default Default Group"
+  group:
+    name: "{{ default_group }}"
+    state: absent
+  when: getent_passwd[default_user] is not none

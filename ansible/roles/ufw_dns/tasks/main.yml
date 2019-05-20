@@ -1,0 +1,5 @@
+- name: Enable DNS Port
+  ufw:
+    rule: allow
+    port: "53"
+  notify: "reload ufw"

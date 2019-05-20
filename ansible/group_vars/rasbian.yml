@@ -1,0 +1,4 @@
+ansible_python_interpreter: /usr/bin/python3
+default_user: pi
+default_group: pi
+default_password: raspberry

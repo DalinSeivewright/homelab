@@ -1,0 +1,21 @@
+- name: Install UFW
+  apt:
+    name: ufw
+    state: latest
+    force_apt_get: yes
+    update_cache: yes
+- name: Enable UFW
+  ufw:
+    state: enabled
+
+- name: Enable SSH Default
+  ufw:
+    rule: allow
+    port: "22"
+  notify: "reload ufw"
+
+- name: Disable Incoming Ports
+  ufw:
+    default: deny
+    direction: incoming
+  notify: "reload ufw"
