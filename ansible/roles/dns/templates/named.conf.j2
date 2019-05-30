@@ -1,0 +1,17 @@
+options {
+  directory "/etc/powerdns/bind";
+};
+
+{% for zone in dns_zones %}
+zone "{{ zone.forward_zone[:-1] }}" {
+  type master;
+  notify no;
+  file "{{ zone.forward_zone[:-1] }}";
+};
+
+zone "{{ zone.reverse_zone[:-1]}}" {
+  type master;
+  notify no;
+  file "{{ zone.reverse_zone[:-1] }}";
+};
+{% endfor %}

@@ -14,7 +14,7 @@
     state: absent
   when: getent_passwd[default_user] is not none
 
-- name: "Default Default Group"
+- name: "Remove Default Group"
   group:
     name: "{{ default_group }}"
     state: absent

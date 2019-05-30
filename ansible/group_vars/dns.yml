@@ -1,0 +1,26 @@
+dns_root_forwarder_ips:
+  - 1.1.1.1
+  - 8.8.8.8
+  - 208.67.222.222
+dns_zones:
+  - forward_zone: oni.logichromatic.ca.
+    reverse_zone: 1.168.192.in-addr.arpa.
+    authority_dns_ips:
+      - 127.0.0.1:54
+    subnet: 192.168.1
+    serial: 2019052601
+    primary_ns: superintendent
+    ttl: 10M
+    refresh: 5M
+    retry: 1M
+    expire: 1H
+    minimum: 10M
+    records:
+      - name: router
+        host: 1
+      - name: superintendent
+        host: 50
+      - name: hope
+        host: 80
+      - name: zero
+        host: 81

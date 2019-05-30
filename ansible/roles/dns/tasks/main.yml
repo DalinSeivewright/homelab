@@ -1,0 +1,88 @@
+- name: Configure UFW for DNS
+  include_role:
+    name: ufw_dns
+
+- name: Install Power DNS Authority Server
+  apt:
+    name: pdns-server
+    state: latest
+    force_apt_get: yes
+    update_cache: yes
+
+- name: Install Power DNS Recursor Server
+  apt:
+    name: pdns-recursor
+    state: latest
+    force_apt_get: yes
+    update_cache: yes
+
+- name: Create Bind Folder for PowerDNS + Recursor
+  file:
+    path: /etc/powerdns/bind
+    state: directory
+
+- name: Generate Configuration for PowerDNS
+  template:
+    src: templates/pdns.conf.j2
+    dest: /etc/powerdns/pdns.conf
+    mode: u+r
+  notify: "restart pdns"
+
+- name: Generate Configuration for Recursor
+  template:
+    src: templates/recursor.conf.j2
+    dest: /etc/powerdns/recursor.conf
+    mode: u+r
+  notify: "restart recursor"
+
+- name: Generate Configuration for Zones
+  template:
+    src: templates/named.conf.j2
+    dest: /etc/powerdns/bind/named.conf
+    mode: u+r
+  notify: "restart pdns"
+
+- name: Generate Configuration for Local Zone
+  template:
+    src: templates/local-domain-zone-forward.j2
+    dest: "/etc/powerdns/bind/{{ item.forward_zone[:-1] }}"
+    mode: u+r
+  loop: "{{ dns_zones }}"
+  notify: "restart pdns"
+
+- name: Generate Configuration for Local Zone Reverse
+  template:
+    src: templates/local-domain-zone-reverse.j2
+    dest: "/etc/powerdns/bind/{{item.reverse_zone[:-1]}}"
+    mode: u+r
+  loop: "{{ dns_zones }}"
+  notify: "restart pdns"
+
+# - name: Generate DNSSEC DB
+#   command: pdnsutil --force create-bind-db /etc/powerdns/bind/dnssec.db
+#   notify: "restart pdns"
+
+- name: Remove Symlink for resolve.conf
+  file:
+    path: /etc/resolv.conf
+    state: absent
+
+- name: Generate Configuration for resolv.conf
+  template:
+    src: templates/resolv.conf.j2
+    dest: /etc/resolv.conf
+    mode: u+r
+
+- name: Stop Systemd Resolved
+  command: systemctl stop systemd-resolved
+
+- name: Disable Systemd Resolved
+  command: systemctl disable systemd-resolved
+
+- name: Restart Network Interfaces
+  service:
+    name: systemd-networkd
+    state: restarted
+  notify:
+   - "restart pdns"
+   - "restart recursor"

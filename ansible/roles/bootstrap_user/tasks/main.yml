@@ -18,7 +18,7 @@
     user: "{{ provision_user }}"
     state: present
     path: "/home/{{ provision_user }}/.ssh/authorized_keys"
-    key: "{{lookup('file', '{{ playbook_dir }}/keys/provision.pub')}}"
+    key: "{{ lookup('file','{{ provision_public_key_path }}') }}"
 
 - name: Create Provisioning Sudoers file
   file:
