@@ -1,6 +1,7 @@
 api-readonly=yes
 config-dir=/etc/powerdns
-forward-zones={% for zone in dns_zones %}{{zone.forward_zone}}={{zone.authority_dns_ips | join(';')}},{{zone.reverse_zone}}={{zone.authority_dns_ips | join(';')}}{% endfor %},.={{ dns_root_forwarder_ips | join (';') }}
+forward-zones={% for zone in dns_zones %}{{zone.forward_zone}}={{zone.authority_dns_ips | join(';')}},{{zone.reverse_zone}}={{zone.authority_dns_ips | join(';')}}{% endfor %}
+forward-zones-recurse=.={{ dns_root_forwarder_ips | join (';') }}
 hint-file=/usr/share/dns/root.hints
 include-dir=
 local-address=0.0.0.0
