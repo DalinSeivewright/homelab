@@ -1,0 +1,5 @@
+- name: Enable specific UFW port
+  ufw:
+    rule: allow
+    port: "{{ port_to_open }}"
+  notify: "reload ufw"

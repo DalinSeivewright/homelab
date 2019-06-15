@@ -1,0 +1,4 @@
+- name: restart pdns
+  service:
+    name: pdns
+    state: restarted

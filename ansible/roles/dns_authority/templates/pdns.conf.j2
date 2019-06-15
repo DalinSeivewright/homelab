@@ -1,6 +1,6 @@
-local-port=54
+local-port={{ '54' if 'dns_recursor' in group_names else '53' }}
 launch=bind
-master=yes
+master={{ 'yes' if hostvars[inventory_hostname]['dns_authority_type'] == 'master' else 'no' }}
 security-poll-suffix=
 include-dir=
 # disabled for now

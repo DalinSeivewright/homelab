@@ -2,3 +2,4 @@ provision_user: provision
 provision_group: provision
 provision_public_key: keys/provision.pub
 provision_private_key: keys/provision
+ansible_ssh_extra_args: -o StrictHostKeyChecking=no

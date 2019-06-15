@@ -1,0 +1,16 @@
+$TTL {{ item.ttl }}
+{{ item.reverse_zone }} IN SOA {{ item.primary_nameserver }}.{{ item.forward_zone }} root.{{ item.forward_zone }} (
+  {{ item.serial }} ;serial
+  {{ item.refresh }} ; refresh
+  {{ item.retry }} ; retry
+  {{ item.expire }} ; expires
+  {{ item.minimum }} ; minimum
+)
+{{ item.reverse_zone }} NS {{ item.primary_nameserver }}.{{ item.forward_zone }}
+{% for secondary_server in item.secondary_nameservers %}
+{{ item.reverse_zone }} NS {{ secondary_server }}.{{item.forward_zone }}
+{% endfor %}
+
+{% for record in item.records %}
+{{ record.host }}.{{item.reverse_zone}} PTR {{record.name}}.{{item.forward_zone}}
+{% endfor %}

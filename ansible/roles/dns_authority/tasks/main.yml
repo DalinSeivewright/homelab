@@ -1,0 +1,41 @@
+- name: Install Power DNS Authority Server
+  apt:
+    name: pdns-server
+    state: latest
+    force_apt_get: yes
+    update_cache: no
+
+- name: Create Bind Folder for PowerDNS
+  file:
+    path: /etc/powerdns/bind
+    state: directory
+
+- name: Generate Configuration for PowerDNS Authority
+  template:
+    src: templates/pdns.conf.j2
+    dest: /etc/powerdns/pdns.conf
+    mode: u+r
+  notify: "restart pdns"
+
+- name: Generate Configuration for Zones
+  template:
+    src: templates/named.conf.j2
+    dest: /etc/powerdns/bind/named.conf
+    mode: u+r
+  notify: "restart pdns"
+
+- name: Generate Configuration for Local Zone
+  template:
+    src: templates/local-domain-zone-forward.j2
+    dest: "/etc/powerdns/bind/{{ item.forward_zone[:-1] }}"
+    mode: u+r
+  loop: "{{ dns_zones }}"
+  notify: "restart pdns"
+
+- name: Generate Configuration for Local Zone Reverse
+  template:
+    src: templates/local-domain-zone-reverse.j2
+    dest: "/etc/powerdns/bind/{{item.reverse_zone[:-1]}}"
+    mode: u+r
+  loop: "{{ dns_zones }}"
+  notify: "restart pdns"

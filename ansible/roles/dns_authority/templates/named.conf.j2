@@ -1,0 +1,43 @@
+options {
+  directory "/etc/powerdns/bind";
+};
+
+{% for zone in dns_zones %}
+zone "{{ zone.forward_zone[:-1] }}" {
+  {% if hostvars[inventory_hostname].dns_authority_type == 'master' %}
+  type master;
+  notify no;
+  {% endif %}
+
+  {% if hostvars[inventory_hostname].dns_authority_type == 'slave' %}
+  type slave;
+  masters {
+    {% for host in groups.dns_authority %}
+      {% if hostvars[host].dns_authority_type == 'master' %}
+        {{ hostvars[host].ansible_host }};
+      {% endif %}
+    {% endfor %}
+  };
+  {% endif %}
+  file "{{ zone.forward_zone[:-1] }}";
+};
+
+zone "{{ zone.reverse_zone[:-1]}}" {
+  {% if hostvars[inventory_hostname].dns_authority_type == 'master' %}
+    type master;
+    notify no;
+  {% endif %}
+
+  {% if hostvars[inventory_hostname].dns_authority_type == 'slave' %}
+  type slave;
+  masters {
+    {% for host in groups.dns_authority %}
+      {% if hostvars[host].dns_authority_type == 'master' %}
+        {{ hostvars[host].ansible_host }};
+      {% endif %}
+    {% endfor %}
+  };
+  {% endif %}
+  file "{{ zone.reverse_zone[:-1] }}";
+};
+{% endfor %}

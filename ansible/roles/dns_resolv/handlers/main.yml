@@ -1,0 +1,16 @@
+- name: restart networkd
+  service:
+    name: systemd-networkd
+    state: restarted
+
+- name: restart pdns
+  service:
+    name: pdns
+    state: restarted
+  when: "'dns_authority' in group_names"
+
+- name: restart recursor
+  service:
+    name: pdns-recursor
+    state: restarted
+  when: "'dns_recursor' in group_names"

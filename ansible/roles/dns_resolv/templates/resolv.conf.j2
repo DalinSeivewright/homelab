@@ -1,0 +1,4 @@
+search oni.logichromatic.ca
+{% for host in groups.dns_recursor %}
+nameserver {{ hostvars[host].ansible_host }}
+{% endfor %}

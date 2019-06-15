@@ -1,0 +1,32 @@
+- name: Remove Symlink for resolv.conf
+  file:
+    path: /etc/resolv.conf
+    state: absent
+  notify:
+    - restart networkd
+    - restart pdns
+    - restart recursor
+
+- name: Generate Configuration for resolv.conf
+  template:
+    src: templates/resolv.conf.j2
+    dest: /etc/resolv.conf
+    mode: u+r
+  notify:
+    - restart networkd
+    - restart pdns
+    - restart recursor
+
+- name: Stop Systemd Resolved
+  command: systemctl stop systemd-resolved
+  notify:
+    - restart networkd
+    - restart pdns
+    - restart recursor
+
+- name: Disable Systemd Resolved
+  command: systemctl disable systemd-resolved
+  notify:
+    - restart networkd
+    - restart pdns
+    - restart recursor

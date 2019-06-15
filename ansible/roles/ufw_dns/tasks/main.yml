@@ -1,5 +1,12 @@
-- name: Enable DNS Port
-  ufw:
-    rule: allow
-    port: "53"
-  notify: "reload ufw"
+- name: Enable Main DNS Port
+  include_role:
+    name: ufw_open_port
+  vars:
+    port_to_open: '53'
+
+- name: Enable Authority DNS Port (if recursor also exists on this host)
+  include_role:
+    name: ufw_open_port
+  vars:
+    port_to_open: '54'
+  when: ('dns_recursor' in group_names) and ('dns_authority' in group_names)

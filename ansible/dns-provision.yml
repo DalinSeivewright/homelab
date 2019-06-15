@@ -1,16 +1,40 @@
-- hosts: "{{ new_hosts }}"
+- hosts: "dns_recursor"
   gather_facts: no
   become: yes
   tasks:
-  - name: Base Rasbian Setup
+  - name: Configure UFW for DNS
     include_role:
-      name: rasbian
-    # Remember to change this
-    when: "'rasbian' in group_names"
-  - name: Provision DNS Service
+      name: ufw_dns
+  - name: Provision Recursor DNS Services
     include_role:
-      name: dns
-    when: "'dns' in group_names"
+      name: dns_recursor
+    when: "'dns_recursor' in group_names"
+  vars:
+      ansible_user: "{{ provision_user }}"
+      ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+
+- hosts: "dns_authority"
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Configure UFW for DNS
+    include_role:
+      name: ufw_dns
+  - name: Provision Authority DNS Services
+    include_role:
+      name: dns_authority
+    when: "'dns_authority' in group_names"
+  vars:
+      ansible_user: "{{ provision_user }}"
+      ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+
+- hosts: "dns_recursor, dns_authority"
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Reconfigure Resolv.conf and restart Networking and DNS Services
+    include_role:
+      name: dns_resolv
   vars:
       ansible_user: "{{ provision_user }}"
       ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

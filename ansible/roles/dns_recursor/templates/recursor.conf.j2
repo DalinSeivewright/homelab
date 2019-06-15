@@ -1,0 +1,15 @@
+api-readonly=yes
+config-dir=/etc/powerdns
+forward-zones={% for local_zone in dns_local_zones %}{{local_zone.zone}}={{local_zone.host_ips | join(';')}},{% endfor %}
+
+forward-zones-recurse={% for recurse_zone in dns_recurse_zones %}{{recurse_zone.zone}}={{recurse_zone.host_ips | join(';')}},{% endfor %}
+
+hint-file=/usr/share/dns/root.hints
+include-dir=
+local-address=127.0.0.1, {{ansible_host}}
+
+local-port=53
+security-poll-suffix=
+setgid=pdns
+setuid=pdns
+webserver=no
