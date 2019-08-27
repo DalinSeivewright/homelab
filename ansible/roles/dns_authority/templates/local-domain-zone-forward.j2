@@ -7,10 +7,14 @@ $TTL {{ item.ttl }}
   {{ item.minimum }} ; minimum
 )
 {{ item.forward_zone }} NS {{ item.primary_nameserver }}.{{ item.forward_zone }}
+{% if secondary_nameservers is defined and secondary_nameservers %}
 {% for secondary_server in item.secondary_nameservers %}
 {{ item.forward_zone }} NS {{ secondary_server }}.{{item.forward_zone }}
 {% endfor %}
+{% endif %}
 
-{% for host in item.records %}
-{{ host.name }}.{{ item.forward_zone }} A {{item.subnet}}.{{host.host}}
+{% for record in item.records %}
+{% for host in record.hosts %}
+{{ host.name }}.{{ item.forward_zone }} A {{record.subnet}}.{{host.host}}
+{% endfor %}
 {% endfor %}

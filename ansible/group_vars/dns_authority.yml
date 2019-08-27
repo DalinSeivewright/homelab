@@ -1,24 +1,56 @@
-dns_zones:
+dns_forward_zones:
   - forward_zone: oni.logichromatic.ca.
-    reverse_zone: 1.168.192.in-addr.arpa.
-    subnet: 192.168.1
-    serial: 2019052601
-    primary_nameserver: superintendent
+    serial: 2019082401
+    primary_nameserver: inclement-monitor
     secondary_nameservers:
-      - vergil
+    #   - vergil
     ttl: 10M
     refresh: 5M
     retry: 1M
     expire: 1H
     minimum: 10M
     records:
-      - name: router
-        host: 1
+      - subnet: 192.168.2
+        hosts:
+        - name: superintendent
+          host: 1
+        - name: auntie-dot
+          host: 100
+        - name: inclement-monitor
+          host: 101
+        - name: eternal-spring
+          host: 102
+        - name: endless-summer
+          host: 103
+        - name: enduring-fall
+          host: 104
+        - name: deep-winter
+          host: 105
+
+dns_reverse_zones:
+  - forward_zone: oni.logichromatic.ca.
+    reverse_zone: 2.168.192.in-addr.arpa.
+    serial: 2019082401
+    primary_nameserver: inclement-monitor
+    # secondary_nameservers:
+    #   - vergil
+    ttl: 10M
+    refresh: 5M
+    retry: 1M
+    expire: 1H
+    minimum: 10M
+    records:
       - name: superintendent
-        host: 50
-      - name: vergil
-        host: 51
-      - name: hope
-        host: 80
-      - name: zero
-        host: 81
+        host: 1
+      - name: auntie-dot
+        host: 100
+      - name: inclement-monitor
+        host: 101
+      - name: eternal-spring
+        host: 102
+      - name: endless-summer
+        host: 103
+      - name: enduring-fall
+        host: 104
+      - name: deep-winter
+        host: 105

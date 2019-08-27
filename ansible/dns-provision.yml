@@ -28,13 +28,14 @@
       ansible_user: "{{ provision_user }}"
       ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
 
-- hosts: "dns_recursor, dns_authority"
-  gather_facts: no
-  become: yes
-  tasks:
-  - name: Reconfigure Resolv.conf and restart Networking and DNS Services
-    include_role:
-      name: dns_resolv
-  vars:
-      ansible_user: "{{ provision_user }}"
-      ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+# DHCP is providing the primary + secondary nameservers for now
+# - hosts: "dns_recursor, dns_authority"
+#   gather_facts: no
+#   become: yes
+#   tasks:
+#   - name: Reconfigure Resolv.conf and restart Networking and DNS Services
+#     include_role:
+#       name: dns_resolv
+#   vars:
+#       ansible_user: "{{ provision_user }}"
+#       ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

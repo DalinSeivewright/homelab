@@ -7,9 +7,11 @@ $TTL {{ item.ttl }}
   {{ item.minimum }} ; minimum
 )
 {{ item.reverse_zone }} NS {{ item.primary_nameserver }}.{{ item.forward_zone }}
+{% if secondary_nameservers is defined and secondary_nameservers %}
 {% for secondary_server in item.secondary_nameservers %}
 {{ item.reverse_zone }} NS {{ secondary_server }}.{{item.forward_zone }}
 {% endfor %}
+{% endif %}
 
 {% for record in item.records %}
 {{ record.host }}.{{item.reverse_zone}} PTR {{record.name}}.{{item.forward_zone}}

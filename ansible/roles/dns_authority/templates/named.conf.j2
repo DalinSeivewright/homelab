@@ -2,7 +2,7 @@ options {
   directory "/etc/powerdns/bind";
 };
 
-{% for zone in dns_zones %}
+{% for zone in dns_forward_zones %}
 zone "{{ zone.forward_zone[:-1] }}" {
   {% if hostvars[inventory_hostname].dns_authority_type == 'master' %}
   type master;
@@ -21,6 +21,9 @@ zone "{{ zone.forward_zone[:-1] }}" {
   {% endif %}
   file "{{ zone.forward_zone[:-1] }}";
 };
+{% endfor %}
+
+{% for zone in dns_reverse_zones %}
 
 zone "{{ zone.reverse_zone[:-1]}}" {
   {% if hostvars[inventory_hostname].dns_authority_type == 'master' %}

@@ -29,7 +29,7 @@
     src: templates/local-domain-zone-forward.j2
     dest: "/etc/powerdns/bind/{{ item.forward_zone[:-1] }}"
     mode: u+r
-  loop: "{{ dns_zones }}"
+  loop: "{{ dns_forward_zones }}"
   notify: "restart pdns"
 
 - name: Generate Configuration for Local Zone Reverse
@@ -37,5 +37,5 @@
     src: templates/local-domain-zone-reverse.j2
     dest: "/etc/powerdns/bind/{{item.reverse_zone[:-1]}}"
     mode: u+r
-  loop: "{{ dns_zones }}"
+  loop: "{{ dns_reverse_zones }}"
   notify: "restart pdns"

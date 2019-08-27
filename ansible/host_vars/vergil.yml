@@ -1,2 +1,2 @@
-ansible_host: 192.168.1.51
-dns_authority_type: slave
+#ansible_host: 192.168.1.51
+#dns_authority_type: slave

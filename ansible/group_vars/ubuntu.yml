@@ -1,0 +1,4 @@
+ansible_python_interpreter: /usr/bin/python3
+default_user: default_user
+default_group: default_user
+default_password: default_user
