@@ -3,3 +3,6 @@ provision_group: provision
 provision_public_key: keys/provision.pub
 provision_private_key: keys/provision
 ansible_ssh_extra_args: -o StrictHostKeyChecking=no
+interactive_user: vergil
+interactive_group: vergil
+interactive_password: $6$IfksGUio$QhTMOfoXhYhifdRGax4PvlnmJWXJnmmSiSt8GKh/0TMDwEQX6Ng7wSEEdn1c7rp99vvUzTf1EYGW9XRW3mdhu.

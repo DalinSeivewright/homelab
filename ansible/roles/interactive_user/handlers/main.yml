@@ -1,0 +1,3 @@
+- name: force password reset
+  command: "chage -d 0 {{ interactive_user }}"
+  

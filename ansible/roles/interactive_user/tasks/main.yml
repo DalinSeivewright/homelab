@@ -1,0 +1,40 @@
+- name: Add Interactive Group
+  group:
+    name: "{{ new_group }}"
+    state: present
+    system: no
+
+- name: Add Interactive User
+  user:
+    group: "{{ new_group }}"
+    groups: "sudo"
+    name: "{{ new_user }}"
+    create_home: true
+    shell: /bin/bash
+    password: "{{ new_password }}"
+    update_password: always
+    state: present
+  notify: force password reset
+
+- name: Copy User Key to Interactive User
+  authorized_key:
+    user: "{{ new_user }}"
+    state: present
+    path: "/home/{{ new_user }}/.ssh/authorized_keys"
+    key: "{{ lookup('file','{{ new_public_key_path }}') }}"
+
+- name: Create Interactive Sudoers file
+  file:
+    path: "/etc/sudoers.d/{{ new_user }}"
+    owner: root
+    group: root
+    mode: u+rw
+    state: touch
+  changed_when: False
+
+- name: Enable Passwordless Sudo for Interactive User
+  lineinfile:
+    dest: "/etc/sudoers.d/{{ new_user }}"
+    line: "{{new_user}} ALL=(ALL) NOPASSWD: ALL"
+    state: present
+    validate: "visudo --check --file=%s"
