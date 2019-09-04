@@ -1,14 +1,10 @@
-# - name: Display all variables/facts known for a host
-#   debug:
-#     var: hostvars[inventory_hostname]
-
 - name: Install XFCE Desktop
   apt:
     install_recommends: no
     state: present
     name:
       - xubuntu-desktop
-  when: "hostvars[inventory_hostname]['feature_xfce_desktop'] == true"
+  when: "installing == true"
   notify: reboot
 
 - name: Remove XFCE Desktop
@@ -17,5 +13,5 @@
     autoremove: yes
     name:
       - xubuntu-desktop
-  when: "hostvars[inventory_hostname]['feature_xfce_desktop'] == false"
+  when: "installing == false"
   notify: reboot

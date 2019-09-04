@@ -1,0 +1,11 @@
+- name: Install XFCE Desktop Environment
+  include_roles:
+    name: xfce_desktop
+  vars:
+    installing: "{feature_server_desktop}"
+
+- name: Install Atom
+  include_roles:
+    name: atom
+  vars:
+    installing: "{feature_server_desktop}"

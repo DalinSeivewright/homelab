@@ -1,0 +1,15 @@
+- name: Install Atom
+  apt:
+    install_recommends: no
+    state: present
+    name:
+      - atom
+  when: "installing == true"
+
+- name: Remove Atom
+  apt:
+    state: absent
+    autoremove: yes
+    name:
+      - atom
+  when: "installing == false"
