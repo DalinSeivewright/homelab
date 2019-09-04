@@ -2,7 +2,6 @@
   include_role:
     name: ufw_default
 
-- name: Update Cache
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
+- name: Update and Upgrade
+  include_role:
+    name: update-upgrade
