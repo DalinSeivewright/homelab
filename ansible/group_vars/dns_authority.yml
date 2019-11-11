@@ -1,7 +1,7 @@
 dns_forward_zones:
   - forward_zone: oni.logichromatic.ca.
     serial: 2019082401
-    primary_nameserver: inclement-monitor
+    primary_nameserver: auntie-dot
     secondary_nameservers:
     #   - vergil
     ttl: 10M
@@ -31,7 +31,7 @@ dns_reverse_zones:
   - forward_zone: oni.logichromatic.ca.
     reverse_zone: 2.168.192.in-addr.arpa.
     serial: 2019082401
-    primary_nameserver: inclement-monitor
+    primary_nameserver: auntie-dot
     # secondary_nameservers:
     #   - vergil
     ttl: 10M
