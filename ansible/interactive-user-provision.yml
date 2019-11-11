@@ -4,12 +4,14 @@
   tasks:
   - name: Add Interactive User
     include_role:
-      name: interactive_user
+      name: add_interactive_user
+    when: "{{feature_interactive_user}}"
     vars:
-      new_user: "{{ interactive_user }}"
-      new_group: "{{ interactive_group }}"
-      new_password: "{{ interactive_password }}"
-      new_public_key_path: "{{ provision_public_key | realpath }}"
+      interactive_user: "{{ interactive_user }}"
+      interactive_group: "{{ interactive_group }}"
+      interactive_password: "{{ interactive_password }}"
+      interactive_public_key_path: "{{ provision_public_key | realpath }}"
+      installing: "{{feature_interactive_user}}"
   vars:
       ansible_user: "{{ provision_user }}"
       ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

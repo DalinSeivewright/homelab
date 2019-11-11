@@ -1,0 +1,17 @@
+- name: Install XFCE Desktop Environment
+  include_role:
+    name: xfce_desktop
+  vars:
+    installing: "{{feature_server_desktop}}"
+
+- name: Install Atom
+  include_role:
+    name: atom
+  vars:
+    installing: "{{feature_server_desktop}}"
+
+# TODO Remove provision user from login screen with AccountService/lightdm config
+# Account service:
+# create file at /var/lib/AccountsService/users/XXX with
+# [User]
+# SystemAccount=true

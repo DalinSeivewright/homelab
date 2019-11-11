@@ -2,8 +2,7 @@
   apt:
     install_recommends: no
     state: present
-    name:
-      - atom
+    deb: https://atom.io/download/deb
   when: "installing == true"
 
 - name: Remove Atom

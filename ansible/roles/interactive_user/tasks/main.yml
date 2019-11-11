@@ -1,40 +1,68 @@
 - name: Add Interactive Group
   group:
-    name: "{{ new_group }}"
+    name: "{{ interactive_group }}"
     state: present
     system: no
+  when: "{{installing}}"
 
 - name: Add Interactive User
   user:
-    group: "{{ new_group }}"
+    group: "{{ interactive_group }}"
     groups: "sudo"
-    name: "{{ new_user }}"
+    name: "{{ interactive_user }}"
     create_home: true
     shell: /bin/bash
-    password: "{{ new_password }}"
+    password: "{{ interactive_password }}"
     update_password: always
     state: present
+  when: "{{installing}}"
   notify: force password reset
 
 - name: Copy User Key to Interactive User
   authorized_key:
-    user: "{{ new_user }}"
+    user: "{{ interactive_user }}"
     state: present
-    path: "/home/{{ new_user }}/.ssh/authorized_keys"
-    key: "{{ lookup('file','{{ new_public_key_path }}') }}"
+    path: "/home/{{ interactive_user }}/.ssh/authorized_keys"
+    key: "{{ lookup('file','{{ interactive_public_key_path }}') }}"
+  when: "{{installing}}"
 
 - name: Create Interactive Sudoers file
   file:
-    path: "/etc/sudoers.d/{{ new_user }}"
+    path: "/etc/sudoers.d/{{ interactive_user }}"
     owner: root
     group: root
     mode: u+rw
     state: touch
-  changed_when: False
+  changed_when: false
+  when: "{{installing}}"
 
 - name: Enable Passwordless Sudo for Interactive User
   lineinfile:
-    dest: "/etc/sudoers.d/{{ new_user }}"
-    line: "{{new_user}} ALL=(ALL) NOPASSWD: ALL"
+    dest: "/etc/sudoers.d/{{ interactive_user }}"
+    line: "{{interactive_user}} ALL=(ALL) NOPASSWD: ALL"
     state: present
     validate: "visudo --check --file=%s"
+  when: "{{installing}}"
+
+# TODO DELETE USER
+  # - name: "Check if user exists."
+  #   getent:
+  #     database: passwd
+  #     key: "{{ default_user }}"
+  #     fail_key: False
+  #
+  # - name: "Kill Processes.  RIP."
+  #   shell: "pkill --signal KILL -u {{ default_user }}"
+  #   when: getent_passwd[default_user] is not none
+  #
+  # - name: "Remove Default User"
+  #   user:
+  #     name: "{{ default_user }}"
+  #     state: absent
+  #   when: getent_passwd[default_user] is not none
+  #
+  # - name: "Remove Default Group"
+  #   group:
+  #     name: "{{ default_group }}"
+  #     state: absent
+  #   when: getent_passwd[default_user] is not none
