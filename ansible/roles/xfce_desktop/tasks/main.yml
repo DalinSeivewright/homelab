@@ -7,6 +7,22 @@
   when: "installing == true"
   notify: reboot
 
+- name: Hide provision user from login
+  include_role:
+    name: lightdm_hide_user
+  vars:
+    user: "{{ provision_user }}"
+  when: "installing"
+
+- name: Remove provision user login file
+  include_role:
+    name: lightdm_hide_user
+  vars:
+    user: "{{ provision_user }}"
+    remove: yes
+  when: "not installing"
+
+
 - name: Remove XFCE Desktop
   apt:
     state: absent

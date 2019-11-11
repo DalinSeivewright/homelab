@@ -1,0 +1,12 @@
+- name: Add Light DM SystemAccount Config
+  template:
+    src: templates/lightdm_user_file.j2
+    dest: "/var/lib/AccountsService/users/{{user}}"
+    mode: u+r
+  when: "not remove"
+
+- name: Remove Light DM SystemAccount Config
+  file:
+    path: "/var/lib/AccountsService/users/{{user}}"
+    state: absent
+  when: "remove"
