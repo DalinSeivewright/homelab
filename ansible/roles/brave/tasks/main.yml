@@ -1,0 +1,31 @@
+- name: Dependencies
+  apt:
+    pkg:
+    - apt-transport-https
+    - curl
+    state: latest
+    force_apt_get: yes
+    update_cache: no
+  when: installing
+
+- name: Add Brave Key
+  apt_key:
+    url: https://brave-browser-apt-release.s3.brave.com/brave-core.asc
+    keyring: /etc/apt/trusted.gpg.d/brave-browser-release.gpg
+    state: present
+  when: installing
+
+- name: Add Brave Source
+  shell: source /etc/os-release && echo "deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ ${UBUNTU_CODENAME} main" > /etc/apt/sources.list.d/brave-browser-release-${UBUNTU_CODENAME}.list
+  args:
+    executable: /bin/bash
+  when: installing
+
+- name: Install Brave
+  apt:
+    pkg:
+    - brave-browser
+    state: latest
+    force_apt_get: yes
+    update_cache: yes
+  when: installing

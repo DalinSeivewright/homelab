@@ -10,6 +10,12 @@
   vars:
     installing: "{{feature_server_desktop}}"
 
+- name: Install Brave
+  include_role:
+    name: brave
+  vars:
+    installing: "{{feature_server_desktop}}"
+
 # TODO Remove provision user from login screen with AccountService/lightdm config
 # Account service:
 # create file at /var/lib/AccountsService/users/XXX with
