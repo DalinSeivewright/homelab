@@ -26,6 +26,8 @@ dns_forward_zones:
           host: 104
         - name: deep-winter
           host: 105
+        - name: melissa
+          host: 106
 
 dns_reverse_zones:
   - forward_zone: oni.logichromatic.ca.
@@ -54,3 +56,5 @@ dns_reverse_zones:
         host: 104
       - name: deep-winter
         host: 105
+      - name: melissa
+        host: 106
