@@ -1,17 +1,17 @@
-- hosts: "{{target_host}}"
+- hosts: all
   gather_facts: no
   become: yes
   tasks:
   - name: Add Interactive User
     include_role:
-      name: add_interactive_user
-    when: "{{feature_interactive_user}}"
+      name: interactive_user
+    when: "feature_interactive_user"
     vars:
-      interactive_user: "{{ interactive_user }}"
-      interactive_group: "{{ interactive_group }}"
-      interactive_password: "{{ interactive_password }}"
-      interactive_public_key_path: "{{ provision_public_key | realpath }}"
-      installing: "{{feature_interactive_user}}"
+      specific_interactive_user: "{{ interactive_user }}"
+      specific_interactive_group: "{{ interactive_group }}"
+      specific_interactive_password: "{{ interactive_password }}"
+      specific_interactive_public_key_path: "{{ provision_public_key | realpath }}"
+      installing: yes
   vars:
       ansible_user: "{{ provision_user }}"
       ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

@@ -1,48 +1,48 @@
 - name: Add Interactive Group
   group:
-    name: "{{ interactive_group }}"
+    name: "{{ specific_interactive_group }}"
     state: present
     system: no
-  when: "{{installing}}"
+  when: "installing"
 
 - name: Add Interactive User
   user:
-    group: "{{ interactive_group }}"
+    group: "{{ specific_interactive_group }}"
     groups: "sudo"
-    name: "{{ interactive_user }}"
+    name: "{{ specific_interactive_user }}"
     create_home: true
     shell: /bin/bash
-    password: "{{ interactive_password }}"
+    password: "{{ specific_interactive_password }}"
     update_password: always
     state: present
-  when: "{{installing}}"
+  when: "installing"
   notify: force password reset
 
 - name: Copy User Key to Interactive User
   authorized_key:
-    user: "{{ interactive_user }}"
+    user: "{{ specific_interactive_user }}"
     state: present
-    path: "/home/{{ interactive_user }}/.ssh/authorized_keys"
-    key: "{{ lookup('file','{{ interactive_public_key_path }}') }}"
-  when: "{{installing}}"
+    path: "/home/{{specific_interactive_user}}/.ssh/authorized_keys"
+    key: "{{ lookup('file','{{specific_interactive_public_key_path}}') }}"
+  when: "installing"
 
 - name: Create Interactive Sudoers file
   file:
-    path: "/etc/sudoers.d/{{ interactive_user }}"
+    path: "/etc/sudoers.d/{{specific_interactive_user}}"
     owner: root
     group: root
     mode: u+rw
     state: touch
   changed_when: false
-  when: "{{installing}}"
+  when: "installing"
 
 - name: Enable Passwordless Sudo for Interactive User
   lineinfile:
-    dest: "/etc/sudoers.d/{{ interactive_user }}"
+    dest: "/etc/sudoers.d/{{specific_interactive_user}}"
     line: "{{interactive_user}} ALL=(ALL) NOPASSWD: ALL"
     state: present
     validate: "visudo --check --file=%s"
-  when: "{{installing}}"
+  when: "installing"
 
 # TODO DELETE USER
   # - name: "Check if user exists."
