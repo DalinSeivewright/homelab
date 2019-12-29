@@ -1,7 +1,7 @@
-- name: Enable UFW and Default rules
-  include_role:
-    name: ufw_default
-    
 - name: Update and Upgrade
   include_role:
     name: update_upgrade
+    
+- name: Enable UFW and Default rules
+  include_role:
+    name: ufw_default
