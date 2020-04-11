@@ -1,0 +1,56 @@
+- hosts: boinc
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Install BOINC
+    include_role:
+      name: boinc
+    vars:
+      installing: yes
+  vars:
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+
+- hosts: boinc_einstein
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Attach Rosetta At Home
+    include_role:
+      name: boinc_attach_project
+    vars:
+      project_name: "http://einstein.phys.uwm.edu/"
+      project_key: "{{einstein_key}}"
+  vars:
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+
+# - hosts: boinc_world_community_grid
+#   gather_facts: no
+#   become: yes
+#   tasks:
+#   - name: Attach World Community Grid
+#     include_role:
+#       name: boinc_attach_project
+#     vars:
+#       project_name: "http://www.worldcommunitygrid.org"
+#       project_key: "{{wcg_key}}"
+#   vars:
+#     ansible_user: "{{ provision_user }}"
+#     ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+#
+# - hosts: boinc_rosetta
+#   gather_facts: no
+#   become: yes
+#   tasks:
+#   - name: Attach Rosetta At Home
+#     include_role:
+#       name: boinc_attach_project
+#     vars:
+#       project_name: "http://boinc.bakerlab.org/rosetta/"
+#       project_key: "{{rosetta_key}}"
+#   vars:
+#     ansible_user: "{{ provision_user }}"
+#     ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+
+

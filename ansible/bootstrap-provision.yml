@@ -10,7 +10,7 @@
     register: ssh_result
     changed_when: False
 
-  - name: Setup anbible_user as Provision User if it is set up
+  - name: Setup ansible_user as Provision User if it is set up
     become: no
     connection: local
     set_fact:
@@ -62,9 +62,9 @@
       name: ubuntu
     when: "'ubuntu' in group_names"
 
-  - name: Interactive Desktop Mode (Feature Toggle)
-    include_role:
-      name: server_desktop_environment
+  # - name: Interactive Desktop Mode (Feature Toggle)
+  #   include_role:
+  #     name: server_desktop_environment
   vars:
     ansible_user: "{{ provision_user }}"
     ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

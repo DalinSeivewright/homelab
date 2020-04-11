@@ -1,0 +1,6 @@
+- name: Attach Project
+  shell: "sudo -u boinc boinccmd --project_attach {{project_name}} {{project_key}}"
+  register: attach_cmd
+  failed_when: "attach_cmd.rc != 0 and 'already attached to project' not in attach_cmd.stderr"
+  args:
+    executable: /bin/bash

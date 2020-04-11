@@ -6,7 +6,10 @@
 
 - name: "Kill Processes.  RIP."
   shell: "pkill --signal KILL -u {{ default_user }}"
+  register: killcmd
   when: getent_passwd[default_user] is not none
+  failed_when: "killcmd.rc == 3 or killcmd.rc == 4"
+
 
 - name: "Remove Default User"
   user:

@@ -1,11 +1,11 @@
 dns_local_zones:
   - zone: oni.logichromatic.ca.
     host_ips:
-      - 192.168.2.100:54
+      - 192.168.1.200:54
 
   - zone: 2.168.192.in-addr.arpa.
     host_ips:
-      - 192.168.2.100:54
+      - 192.168.1.200:54
 
 dns_recurse_zones:
   - zone: .

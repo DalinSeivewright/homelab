@@ -10,6 +10,10 @@ for i in "$@"; do
     DEVICE="${i#*=}"
     shift
     ;;
+    -h=*|--hostname=*)
+    HOSTNAME="${i#*=}"
+    shift
+    ;;
     -w=*|--wpa=*)
     WPAPATH="${i#*=}"
     shift
@@ -33,11 +37,14 @@ fi
 BOOT_PARTITION=p1
 FILE_PARTITION=p2
 BOOTMOUNTPATH=/tmp/pi-boot
+FILEMOUNTPATH=/tmp/pi-root
 
 
 echo "PI Image To Write=${IMAGE}"
 echo "SD Card Device Path=${DEVICE}"
 echo "Temporary Boot Mount Path=${BOOTMOUNTPATH}"
+echo "Temporary File Mount Path=${FILEMOUNTPATH}"
+echo "Hostname=${HOSTNAME}"
 if [ -z "$WPAPATH" ]; then
   echo "WPA Supplicant Path=<Not Copying>"
 else
@@ -84,6 +91,26 @@ then
   echo "Unmounting ${BOOT_PARTITION}"
   umount ${BOOTMOUNTPATH}
   rmdir ${BOOTMOUNTPATH}
+
+  echo "Mounting RPI rootfs directory."
+  FILE_PARTITION="${DEVICE}${FILE_PARTITION}"
+
+  echo "Mounting ${FILE_PARTITION} to ${FILEMOUNTPATH}"
+  mkdir ${FILEMOUNTPATH}
+  mount ${FILE_PARTITION} ${FILEMOUNTPATH}
+
+  if [ ! -z "${HOSTNAME}" ]; then
+    echo "Setting up hostname"
+    echo "${HOSTNAME}" | tee ${FILEMOUNTPATH}/etc/hostname > /dev/null
+
+    sed -i 's/127.0.1.1/# 127.0.1.1/' ${FILEMOUNTPATH}/etc/hosts
+    echo "# modified by logichromatic" | tee --append ${FILEMOUNTPATH}/etc/hosts > /dev/null
+    echo "127.0.1.1 ${HOSTNAME}" | tee --append ${FILEMOUNTPATH}/etc/hosts > /dev/null
+  fi
+
+  echo "Unmounting ${FILE_PARTITION}"
+  umount ${FILEMOUNTPATH}
+  rmdir ${FILEMOUNTPATH}
 
 else
   echo "Aborting."

@@ -1,0 +1,29 @@
+- name: Install BOINC
+  apt:
+    name:
+    - boinc-client
+    state: latest
+  when: installing
+
+- name: Open Remote Control Port
+  include_role:
+    name: ufw_open_port
+  vars:
+    port_to_open: "31416"
+  when: installing
+
+- name: Generate Configuration for Boinc Client
+  template:
+    src: templates/cc_config.xml.j2
+    dest: /var/lib/boinc-client/cc_config.xml
+    mode: u+r
+  notify:
+    - restart boinc
+
+- name: Generate Configuration for Boinc Client Preference Overrides
+  template:
+    src: templates/global_prefs_override.xml.j2
+    dest: /var/lib/boinc-client/global_prefs_override.xml
+    mode: u+r
+  notify:
+    - restart boinc

@@ -10,28 +10,28 @@ dns_forward_zones:
     expire: 1H
     minimum: 10M
     records:
-      - subnet: 192.168.2
+      - subnet: 192.168.1
         hosts:
         - name: superintendent
           host: 1
         - name: auntie-dot
-          host: 100
+          host: 200
         - name: inclement-monitor
-          host: 101
+          host: 201
         - name: eternal-spring
-          host: 102
+          host: 202
         - name: endless-summer
-          host: 103
+          host: 203
         - name: enduring-fall
-          host: 104
+          host: 204
         - name: deep-winter
-          host: 105
+          host: 205
         - name: melissa
-          host: 106
+          host: 206
 
 dns_reverse_zones:
   - forward_zone: oni.logichromatic.ca.
-    reverse_zone: 2.168.192.in-addr.arpa.
+    reverse_zone: 1.168.192.in-addr.arpa.
     serial: 2019082401
     primary_nameserver: auntie-dot
     # secondary_nameservers:
@@ -45,16 +45,16 @@ dns_reverse_zones:
       - name: superintendent
         host: 1
       - name: auntie-dot
-        host: 100
+        host: 200
       - name: inclement-monitor
-        host: 101
+        host: 201
       - name: eternal-spring
-        host: 102
+        host: 202
       - name: endless-summer
-        host: 103
+        host: 203
       - name: enduring-fall
-        host: 104
+        host: 204
       - name: deep-winter
-        host: 105
+        host: 205
       - name: melissa
-        host: 106
+        host: 206
