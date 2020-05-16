@@ -28,6 +28,10 @@ dns_forward_zones:
           host: 205
         - name: melissa
           host: 206
+        - name: rpi-2-01
+          host: 207
+        - name: rpi-2-02
+          host: 208
 
 dns_reverse_zones:
   - forward_zone: oni.logichromatic.ca.
@@ -58,3 +62,7 @@ dns_reverse_zones:
         host: 205
       - name: melissa
         host: 206
+      - name: rpi-2-01
+        host: 207
+      - name: rpi-2-02
+        host: 208

@@ -14,6 +14,24 @@
     port: "22"
   notify: "reload ufw"
 
+- name: Enable NTP
+  ufw:
+    rule: allow
+    port: "123"
+  notify: "reload ufw"
+
+- name: Enable DHCP bootps
+  ufw:
+    rule: allow
+    port: "67"
+  notify: "reload ufw"
+
+- name: Enable DHCP bootpc
+  ufw:
+    rule: allow
+    port: "68"
+  notify: "reload ufw"
+
 - name: Disable Incoming Ports
   ufw:
     default: deny

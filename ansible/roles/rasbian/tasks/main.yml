@@ -2,6 +2,18 @@
   include_role:
     name: ufw_default
 
+- name: Configure Timezone
+  timezone:
+    name: America/Regina
+
+- name: Gen Locale
+  locale_gen:
+    name: en_CA.UTF-8
+    state: present
+
+- name: Set Locale
+  command: localectl set-locale en_CA.UTF-8
+
 - name: Update and Upgrade
   include_role:
     name: update_upgrade
