@@ -1,0 +1,32 @@
+import board
+import neopixel
+from ping3 import ping
+import time
+hosts = [
+{% for host in healthchecker_hosts %}
+  '{{host}}',
+{% endfor %}
+]
+
+BRIGHTNESS = 4
+PIXEL_COUNT = 16
+
+pixels = neopixel.NeoPixel(board.D18, PIXEL_COUNT)
+
+def update():
+  for i in range(PIXEL_COUNT):
+    pixels[i] = (0, 0, 0)
+
+  for i in range(PIXEL_COUNT):
+    if i >= len(hosts):
+        continue
+    pixels[i] = (0, 0, BRIGHTNESS)
+    time.sleep(0.5)
+    r = ping(hosts[i], timeout=0.5)
+    if (r != False and r != None) :
+      pixels[i] = (BRIGHTNESS, BRIGHTNESS, BRIGHTNESS)
+    else:
+      pixels[i] = (BRIGHTNESS, 0, 0)
+
+
+update()

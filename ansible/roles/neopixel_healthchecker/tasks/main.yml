@@ -1,0 +1,38 @@
+
+- name: Install Python3
+  apt:
+    name: python3
+    state: latest
+    force_apt_get: yes
+    update_cache: no
+
+- name: Install Python3 Pip3
+  apt:
+    name: python3-pip
+    state: latest
+    force_apt_get: yes
+    update_cache: no
+
+- name: Install Neopixel Dependencies
+  pip:
+    name:
+      - rpi_ws281x
+      - adafruit-circuitpython-neopixel
+      - adafruit-blinka
+
+- name: Create Neopixel Health Checker folder
+  file:
+    path: "/home/{{provision_user}}/neopixel-healthchecker/"
+    state: directory
+
+- name: Create health check script
+  template:
+    src: templates/neopixel-healthchecker.py.j2
+    dest: "/home/{{provision_user}}/neopixel-healthchecker/neopixel-healthchecker.py"
+    mode: u+r
+
+- name: Add cron job for health checker
+  cron:
+    name: "Neopixel Healthchecker"
+    job: "python3 /home/{{provision_user}}/neopixel-healthchecker/neopixel-healthchecker.py"
+    state: present
