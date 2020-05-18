@@ -3,7 +3,7 @@ dns_forward_zones:
     serial: 2019082401
     primary_nameserver: auntie-dot
     secondary_nameservers:
-    #   - vergil
+      - rpi-2-02
     ttl: 10M
     refresh: 5M
     retry: 1M
@@ -38,8 +38,8 @@ dns_reverse_zones:
     reverse_zone: 1.168.192.in-addr.arpa.
     serial: 2019082401
     primary_nameserver: auntie-dot
-    # secondary_nameservers:
-    #   - vergil
+    secondary_nameservers:
+      - rpi-2-02
     ttl: 10M
     refresh: 5M
     retry: 1M
