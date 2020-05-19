@@ -3,6 +3,7 @@ import neopixel
 import os
 import time
 import json
+from concurrent import futures
 hosts = [
 {% for host in healthchecker_hosts %}
   '{{host}}',
@@ -17,28 +18,18 @@ def load():
     with open("/tmp/neopixel-healthchecker.json") as status_file:
       return json.load(status_file)
   except IOError:
-      return {}
+    return {}
 
-def ping(status_data):
-  for i in range(len(hosts)):
-    time.sleep(0.5)
-    r = os.system("ping -c 1 -w 1 " + hosts[i] + " > /dev/null")
-    status_data[hosts[i]] = r
-  return status_data
-
-
-def update_leds(pixels, status_data, update_delay):
-  print("UPDATE LEDS")
+def update_leds(pixels, status_data, updating_animation, update_delay):
   for i in range(PIXEL_COUNT):
-    print(i)
     if i >= len(hosts):
       return
     if hosts[i] not in status_data:
-      print("HOST " + hosts[i] + " NOT KNOWN, MOVING ON")
       pixels[i] = (0, 0, BRIGHTNESS)
       continue
-    print("waiting " + str(update_delay))
-    time.sleep(update_delay)
+    if updating_animation:
+        pixels[i] = (0, 0, BRIGHTNESS)
+        time.sleep(update_delay)
     if status_data[hosts[i]] == 0:
       pixels[i] = (BRIGHTNESS, BRIGHTNESS, BRIGHTNESS)
     else:
@@ -49,22 +40,34 @@ def save(status_data):
   with open("/tmp/neopixel-healthchecker.json", "w") as status_file:
     json.dump(status_data, status_file)
 
+
+def ping(host):
+    r = os.system("ping -c 1 -w 1 " + host + " > /dev/null")
+    return [host, r]
+
+def ping_hosts(status_data):
+    updated_status_data = {}
+    with futures.ProcessPoolExecutor(max_workers=8) as pool:
+        ping_futures = []
+        for i in range(len(hosts)):
+            ping_futures.append(pool.submit(ping, hosts[i]))
+        while ping_futures:
+            done_pings, ping_futures = futures.wait(ping_futures, timeout = 0.5)
+            for future in done_pings:
+                data = future.result()
+                updated_status_data[data[0]] = data[1]
+    return updated_status_data
+
 def main():
-  print("loading")
   status_data = load()
-  print("init neo pixel")
   pixels = neopixel.NeoPixel(board.D18, PIXEL_COUNT)
-  print("update from cache")
-  update_leds(pixels, status_data, 0)
-  print("ping")
-  test = time.time()
-  updated_status_data = ping(status_data)
-  print(time.time() - test)
-  print("save")
+  update_leds(pixels, status_data, False, 0)
+  updated_status_data = ping_hosts(status_data)
   save(updated_status_data)
-  print("update with new")
-  update_leds(pixels, updated_status_data, 0.5)
-  print("DONE")
+  update_leds(pixels, updated_status_data, True, 0.5)
+
 if __name__ == "__main__":
     main()
+
+
 
