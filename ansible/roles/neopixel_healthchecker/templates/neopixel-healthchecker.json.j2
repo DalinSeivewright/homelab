@@ -1,0 +1,27 @@
+{
+  "servers": [
+  {% for server in servers %}
+    "{{server}}"{{ "," if not loop.last else ""}}
+  {% endfor %}
+  ],
+  "file": "{{file}}",
+  "timeout": "{{timeout}}",
+  "pixels": "{{pixels}}",
+  "colors": {
+    "alive": {
+      "r": 25,
+      "g": 25,
+      "b": 25
+    },
+    "dead": {
+      "r": 25,
+      "g": 0,
+      "b": 0
+    },
+    "updating": {
+      "r": 0,
+      "g": 0,
+      "b": 25
+    }
+  }
+}

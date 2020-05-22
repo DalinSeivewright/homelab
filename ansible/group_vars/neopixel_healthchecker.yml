@@ -9,3 +9,6 @@ healthchecker_hosts:
   - melissa
   - rpi-2-01
   - rpi-2-02
+healthchecker_status_file: /tmp/neopixel-healthchecker-statuses.json
+healthchecker_ping_timeout: 1
+healthchecker_pixel_count: 16
