@@ -8,9 +8,14 @@ from argparse import ArgumentParser
 from sys import exit
 
 BRIGHTNESS_DEFAULT = 100
-LIVE_COLOR_DEFAULT = {'r':BRIGHTNESS_DEFAULT, 'g': BRIGHTNESS_DEFAULT, 'b': BRIGHTNESS_DEFAULT}
+ALIVE_COLOR_KEY = "alive"
+DEAD_COLOR_KEY = "dead"
+UPDATING_COLOR_KEY = "updating"
+EMPTY_COLOR_KEY = "empty"
+ALIVE_COLOR_DEFAULT = {'r':BRIGHTNESS_DEFAULT, 'g': BRIGHTNESS_DEFAULT, 'b': BRIGHTNESS_DEFAULT}
 DEAD_COLOR_DEFAULT = {'r':BRIGHTNESS_DEFAULT, 'g': 0, 'b': 0}
 UPDATING_COLOR_DEFAULT = {'r':0, 'g': 0, 'b': BRIGHTNESS_DEFAULT}
+EMPTY_COLOR_DEFAULT = {'r':0, 'g': 0, 'b': 0}
 
 def load_statuses(status_file_path):
     try:
@@ -23,17 +28,18 @@ def load_statuses(status_file_path):
 def update_leds(pixels, pixel_count, hosts, status_data, updating_animation, colors):
     for i in range(pixel_count):
         if i >= len(hosts):
-            return
+            pixels[i] = (colors[EMPTY_COLOR_KEY]["r"], colors[EMPTY_COLOR_KEY]["g"], colors[EMPTY_COLOR_KEY]["b"])
+            continue
         if hosts[i] not in status_data:
-            pixels[i] = (colors["updating"]["r"], colors["updating"]["g"], colors["updating"]["b"])
+            pixels[i] = (colors[UPDATING_COLOR_KEY]["r"], colors[UPDATING_COLOR_KEY]["g"], colors[UPDATING_COLOR_KEY]["b"])
             continue
         if updating_animation:
-            pixels[i] = (colors["updating"]["r"], colors["updating"]["g"], colors["updating"]["b"])
+            pixels[i] = (colors[UPDATING_COLOR_KEY]["r"], colors[UPDATING_COLOR_KEY]["g"], colors[UPDATING_COLOR_KEY]["b"])
             time.sleep(0.5)
         if status_data[hosts[i]] == 0:
-            pixels[i] = (colors["alive"]["r"], colors["alive"]["g"], colors["alive"]["b"])
+            pixels[i] = (colors[ALIVE_COLOR_KEY]["r"], colors[ALIVE_COLOR_KEY]["g"], colors[ALIVE_COLOR_KEY]["b"])
         else:
-            pixels[i] = (colors["dead"]["r"], colors["dead"]["g"], colors["dead"]["b"])
+            pixels[i] = (colors[DEAD_COLOR_KEY]["r"], colors[DEAD_COLOR_KEY]["g"], colors[DEAD_COLOR_KEY]["b"])
 
 def save_statuses(status_file_path, status_data):
     with open(status_file_path, "w") as status_file:
@@ -42,7 +48,6 @@ def save_statuses(status_file_path, status_data):
 def validate_led_config(rootKey, colors):
     if "r" not in colors or "g" not in colors or "b" not in colors:
         exit("Error: " + rootKey + " LED color is missing a color component")
-
     try:
         validate_led_component(rootKey, colors["r"])
     except ValueError:
@@ -60,7 +65,6 @@ def validate_led_component(rootKey, component):
     c = int(component)
     if c < 0 or c > 255:
         raise ValueError()
-
 
 def ping(host, timeout):
     response = os.system("ping -c 1 -w " + timeout + " " + host + " > /dev/null")
@@ -99,9 +103,11 @@ def process_args():
     argParser.add_argument("-f", "--file", action="store", dest="status_file")
     argParser.add_argument("-t", "--timeout", action="store", dest="timeout")
     argParser.add_argument("-p", "--pixels", action="store", dest="pixels")
-    argParser.add_argument("-a", "--alive", action="store", dest="alive_color")
-    argParser.add_argument("-d", "--dead", action="store", dest="dead_color")
-    argParser.add_argument("-u", "--updating", action="store", dest="updating_color")
+    argParser.add_argument("-a", "--alive", action="store", dest=ALIVE_COLOR_KEY)
+    argParser.add_argument("-d", "--dead", action="store", dest=DEAD_COLOR_KEY)
+    argParser.add_argument("-u", "--updating", action="store", dest=UPDATING_COLOR_KEY)
+    argParser.add_argument("-e", "--empty", action="store", dest=EMPTY_COLOR_KEY)
+
 
     args = vars(argParser.parse_args())
     if args["clear"] != None:
@@ -140,12 +146,14 @@ def overlay_arg_settings(args, settings):
         settings["status_file"] = args["status_file"]
     if args["timeout"] != None:
         settings["timeout"] = args["timeout"]
-    if args["alive_color"] != None:
-        settings["colors"]["alive"] = load_color_from_string("alive", args["alive_color"])
-    if args["dead_color"] != None:
-        settings["colors"]["dead"] = load_color_from_string("dead", args["dead_color"])
-    if args["updating_color"] != None:
-        settings["colors"]["updating"] = load_color_from_string("updating", args["updating_color"])
+    if args[ALIVE_COLOR_KEY] != None:
+        settings["colors"][ALIVE_COLOR_KEY] = load_color_from_string(ALIVE_COLOR_KEY, args[ALIVE_COLOR_KEY])
+    if args[DEAD_COLOR_KEY] != None:
+        settings["colors"][DEAD_COLOR_KEY] = load_color_from_string(DEAD_COLOR_KEY, args[DEAD_COLOR_KEY])
+    if args[UPDATING_COLOR_KEY] != None:
+        settings["colors"][UPDATING_COLOR_KEY] = load_color_from_string(UPDATING_COLOR_KEY, args[UPDATING_COLOR_KEY])
+    if args[EMPTY_COLOR_KEY] != None:
+        settings["colors"][EMPTY_COLOR_KEY] = load_color_from_string(EMPTY_COLOR_KEY, args[EMPTY_COLOR_KEY])
 
 def load_color_from_string(color_key, json_string):
     components = json.loads(json_string)
@@ -162,12 +170,14 @@ def load_color_from_string(color_key, json_string):
 def default_settings(settings):
     if "timeout" not in settings:
         settings["timeout"] = "1"
-    if "alive" not in settings["colors"]:
-        settings["colors"]["alive"] = {'r':BRIGHTNESS_DEFAULT, 'g': BRIGHTNESS_DEFAULT, 'b': BRIGHTNESS_DEFAULT}
-    if "dead" not in settings["colors"]:
-        settings["colors"]["dead"] = {'r':BRIGHTNESS_DEFAULT, 'g': 0, 'b': 0}
-    if "updating" not in settings["colors"]:
-        settings["colors"]["updating"] = {'r':0, 'g': 0, 'b': BRIGHTNESS_DEFAULT}
+    if ALIVE_COLOR_KEY not in settings["colors"]:
+        settings["colors"][ALIVE_COLOR_KEY] = ALIVE_COLOR_DEFAULT
+    if DEAD_COLOR_KEY not in settings["colors"]:
+        settings["colors"][DEAD_COLOR_KEY] = DEAD_COLOR_DEFAULT
+    if UPDATING_COLOR_KEY not in settings["colors"]:
+        settings["colors"][UPDATING_COLOR_KEY] = UPDATING_COLOR_DEFAULT
+    if EMPTY_COLOR_KEY not in settings["colors"]:
+        settings["colors"][EMPTY_COLOR_KEY] = EMPTY_COLOR_DEFAULT
 
 def validate_settings(settings):
     if "servers" not in settings:
@@ -187,12 +197,14 @@ def validate_settings(settings):
             int(settings["pixels"])
         except ValueError:
             exit("Error:  Pixels must be an integer")
-    if "alive" in settings:
-        validate_led_config("alive", settings["colors"])
-    if "dead" in settings:
-        validate_led_config("dead", settings["colors"])
-    if "updating" in settings:
-        validate_led_config("updating", settings["colors"])
+    if ALIVE_COLOR_KEY in settings:
+        validate_led_config(ALIVE_COLOR_KEY, settings["colors"])
+    if DEAD_COLOR_KEY in settings:
+        validate_led_config(DEAD_COLOR_KEY, settings["colors"])
+    if UPDATING_COLOR_KEY in settings:
+        validate_led_config(UPDATING_COLOR_KEY, settings["colors"])
+    if EMPTY_COLOR_KEY in settings:
+        validate_led_config(EMPTY_COLOR_KEY, settings["colors"])
 
 def main():
     settings = process_args()
@@ -209,6 +221,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
