@@ -13,28 +13,20 @@
     force_apt_get: yes
     update_cache: no
 
-- name: Install Neopixel Dependencies
+- name: Install Neopixel Healthecker
   pip:
     name:
-      - rpi_ws281x
-      - adafruit-circuitpython-neopixel
-      - adafruit-blinka
+      - git+https://github.com/DalinSeivewright/neopixel-healthchecker.git
 
 - name: Create Neopixel Health Checker folder
   file:
-    path: "/home/{{provision_user}}/neopixel-healthchecker/"
+    path: "/home/{{provision_user}}/.healthchecker/"
     state: directory
-
-- name: Create health check script
-  template:
-    src: templates/neopixel-healthchecker.py.j2
-    dest: "/home/{{provision_user}}/neopixel-healthchecker/neopixel-healthchecker.py"
-    mode: u+r
 
 - name: Create health check script config file
   template:
     src: templates/neopixel-healthchecker.json.j2
-    dest: "/home/{{provision_user}}/neopixel-healthchecker/neopixel-healthchecker.json"
+    dest: "/home/{{provision_user}}/.healthchecker/neopixel-healthchecker.json"
     mode: u+r
   vars:
     servers: "{{healthchecker_hosts}}"
@@ -45,5 +37,5 @@
 - name: Add cron job for health checker
   cron:
     name: "Neopixel Healthchecker"
-    job: "python3 /home/{{provision_user}}/neopixel-healthchecker/neopixel-healthchecker.py -c /home/{{provision_user}}/neopixel-healthchecker/neopixel-healthchecker.json"
+    job: "python3 /home/{{provision_user}}/.local/bin/neopixel-healthchecker.py -c /home/{{provision_user}}/.healthchecker/neopixel-healthchecker.json"
     state: present
