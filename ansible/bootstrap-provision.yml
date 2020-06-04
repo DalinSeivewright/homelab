@@ -47,6 +47,7 @@
     ansible_ssh_pass: "{{ default_password }}"
     ansible_sudo_pass: "{{ default_password }}"
 
+# TODO Cleanup - we can do this nicer in the hosts filter
 - hosts: "all"
   serial: 1
   gather_facts: no
@@ -65,6 +66,23 @@
   # - name: Interactive Desktop Mode (Feature Toggle)
   #   include_role:
   #     name: server_desktop_environment
+  vars:
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+
+- hosts: telegraf
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Install Telegraf
+      include_role:
+        name: telegraf
+      vars:
+        rpi_stat_collector: "{{'rasbian' in group_names}}"
+        telegraf_url: "{{influxdb_url}}"
+        telegraf_database: "{{influxdb_database}}"
+        telegraf_user: "{{influxdb_user}}"
+        telegraf_password: "{{influxdb_password}}"
   vars:
     ansible_user: "{{ provision_user }}"
     ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
