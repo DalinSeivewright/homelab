@@ -1,0 +1,46 @@
+- name: Add influxdb source key
+  apt_key:
+    url: https://repos.influxdata.com/influxdb.key
+    state: present
+
+- name: Add InfluDB Sources (For Telegraf)
+  shell: source /etc/os-release && echo "deb https://repos.influxdata.com/debian ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+  args:
+    executable: /bin/bash
+
+# Also adds telegraf user as part of install
+- name: Update and Install Telegraf
+  apt:
+    pkg:
+    - telegraf
+    state: latest
+    cache_valid_time: 0
+    update_cache: yes
+
+- name: Add sudo and video group to telegraf for metrics gathering
+  user:
+    name: telegraf
+    groups: sudo,video
+    append: yes
+
+- name: Get Raspberry Stats Collection Script
+  get_url:
+    url: https://raw.githubusercontent.com/robcowart/raspberry_pi_stats/master/rpi-stats.sh
+    dest: /usr/local/bin/rpi-stats.sh
+
+- name: Set ownership of script to telegraf user
+  file:
+    path: /usr/local/bin/rpi-stats.sh
+    state: file
+    owner: telegraf
+    group: telegraf
+    mode: u+x
+
+- name: Generate Configuration for Telegraf
+  template:
+    src: templates/telegraf.conf.j2
+    dest: /etc/telegraf/telegraf.conf
+    mode: u+r
+  notify:
+    - restart telegraf
+

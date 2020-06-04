@@ -1,0 +1,51 @@
+[global_tags]
+
+[agent]
+  interval = "30s"
+  round_interval = true
+  collection_jitter = "2s"
+  metric_batch_size = 1000
+  metric_buffer_limit = 10000
+  flush_interval = "10s"
+  flush_jitter = "5s"
+  precision = "50ms"
+  quiet = true
+  logfile = "/var/log/telegraf/telegraf.log"
+  hostname = ""
+
+
+{% if rpi_stat_collector == true %}
+[[inputs.exec]]
+  # Commands array
+  commands = [ "/usr/local/bin/rpi-stats.sh" ]
+  # Timeout for each command to complete.
+  timeout = "5s"
+  # Data format to consume.
+  data_format = "influx"
+{% endif %}
+
+[[inputs.system]]
+
+[[inputs.cpu]]
+
+[[inputs.mem]]
+
+[[inputs.net]]
+
+[[inputs.swap]]
+
+[[inputs.disk]]
+
+[[inputs.diskio]]
+
+[[inputs.processes]]
+
+[[processors.strings]]
+  [[processors.strings.lowercase]]
+    tag = "host"
+
+[[outputs.influxdb]]
+  urls = ["{{telegraf_url}}"]
+  database = "{{telegraf_database}}"
+  username = "{{telegraf_user}}"
+  password = "{{telegraf_password}}"
