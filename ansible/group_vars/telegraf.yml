@@ -1,4 +1,4 @@
-influxdb_url: http://synology:32771
+influxdb_url: http://synology.oni.logichromatic.ca:32771
 influxdb_database: telegraf
 influxdb_user: telegraf
 influxdb_password: telegraf

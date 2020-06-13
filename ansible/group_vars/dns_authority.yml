@@ -46,6 +46,8 @@ dns_forward_zones:
           host: 209
         - name: rpi-3-04
           host: 210
+        - name: rpi-4-05
+          host: 211
 
 dns_reverse_zones:
   - forward_zone: oni.logichromatic.ca.
@@ -90,3 +92,5 @@ dns_reverse_zones:
         host: 209
       - name: rpi-3-04
         host: 210
+      - name: rpi-4-05
+        host: 211
