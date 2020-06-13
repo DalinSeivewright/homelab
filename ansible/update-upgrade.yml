@@ -1,4 +1,4 @@
-- hosts: z
+- hosts: all
   become: yes
   tasks:
   - name: Update and Upgrade
