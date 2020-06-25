@@ -1,0 +1,97 @@
+# - name: Install Samba
+#   apt:
+#     name: samba
+#     state: latest
+#     force_apt_get: yes
+#     update_cache: no
+#   notify:
+#     - restart samba
+#
+
+- name: Add Mount Groups
+  group:
+    name: "{{ item.group }}"
+    state: present
+    system: no
+    gid: "{{ item.gid }}"
+  loop: "{{ config | maplistwithlistlookup('group', share_groups, 'group') }}"
+
+- name: Add Share Groups
+  group:
+    name: "{{ item.group }}"
+    state: present
+    system: no
+    gid: "{{ item.gid }}"
+  loop: "{{ config | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', share_users, 'user') }}"
+#TODO Add share group to users in share list
+- name: Add Share Users
+  user:
+    group: "{{ item.group }}"
+    uid: "{{ item.uid }}"
+    name: "{{ item.user }}"
+    create_home: false
+    shell: /bin/bash
+    state: present
+    system: no
+  loop: "{{ config | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', share_users, 'user') }}"
+
+- name: Add Share Group to Share Users
+  user:
+    groups: "{{ item.group }}"
+    name: "{{ item.user.user }}"
+    append: yes
+  loop: "{{ config | reversemultimap('group', 'users', 'user') }}"
+
+# TODO Secrets Secrets...  Manual password change after for now
+- name: Set Samba Passwords
+  shell: "printf 'test\ntest\n' | smbpasswd -L -s -a {{item.user}}"
+  loop: "{{ config | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', share_users, 'user') }}"
+  register: test
+
+# TODO Change this to allow an array!
+- name: Open UFW Ports
+  include_role:
+    name: ufw_open_port
+  vars:
+    port_to_open: '445'
+
+- name: Open UFW Ports
+  include_role:
+    name: ufw_open_port
+  vars:
+    port_to_open: '135'
+
+- name: Open UFW Ports
+  include_role:
+    name: ufw_open_port
+  vars:
+    port_to_open: '136'
+
+- name: Open UFW Ports
+  include_role:
+    name: ufw_open_port
+  vars:
+    port_to_open: '137'
+
+
+- name: Create Samba Share Folders
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: nobody
+    group: "{{ item.group }}"
+    mode: g+rw
+  loop: "{{ config }}"
+  notify:
+    - restart samba
+
+- name: Generate Configuration for Samba Config
+  template:
+    src: templates/smb.conf.j2
+    dest: /etc/samba/smb.conf
+    mode: u+r
+  vars:
+    shares: "{{ config }}"
+  notify:
+    - restart samba
+

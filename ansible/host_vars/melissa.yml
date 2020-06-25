@@ -1,9 +1,44 @@
 ansible_host: 192.168.1.206
 feature_interactive_user: yes
-nfs_server:
-  exports:
-    - path: /mnt/md1/test
+samba_server:
+  shares:
+    - name: music_share
+      path: /mnt/md1/shares/music
+      group: music_share
       users:
-        - user: backup_user
-          group: backup_user
-          permissions: rwx
+        - user: media_write
+          read_only: no
+        - user: media_read
+          read_only: yes
+    - name: movie_share
+      path: /mnt/md1/shares/movies
+      group: movie_share
+      users:
+        - user: media_write
+          read_only: no
+        - user: media_read
+          read_only: yes
+    - name: tv_share
+      path: /mnt/md1/shares/tv
+      group: tv_share
+      users:
+        - user: media_write
+          read_only: no
+        - user: media_read
+          read_only: yes
+    - name: document_share
+      path: /mnt/md1/shares/documents
+      group: document_share
+      users:
+        - user: misc_write
+          read_only: no
+        - user: misc_read
+          read_only: yes
+    - name: picture_share
+      path: /mnt/md1/shares/pictures
+      group: picture_share
+      users:
+        - user: media_write
+          read_only: no
+        - user: media_read
+          read_only: yes

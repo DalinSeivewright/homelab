@@ -1,3 +1,4 @@
 ansible/keys
-ansible/homelab
+ansible/secrets
 ansible/homelab-test
+**/*.pyc

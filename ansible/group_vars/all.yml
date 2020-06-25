@@ -7,3 +7,36 @@ interactive_user: vergil
 interactive_group: vergil
 interactive_password: $6$IfksGUio$QhTMOfoXhYhifdRGax4PvlnmJWXJnmmSiSt8GKh/0TMDwEQX6Ng7wSEEdn1c7rp99vvUzTf1EYGW9XRW3mdhu.
 feature_server_desktop: no
+share_groups:
+  - group: music_share
+    gid: 5000
+  - group: movie_share
+    gid: 5001
+  - group: tv_share
+    gid: 5002
+  - group: document_share
+    gid: 5003
+  - group: picture_share
+    gid: 5004
+
+share_users:
+  - user: backup_user
+    uid: 4000
+    group: backup_user
+    gid: 4000
+  - user: media_write
+    uid: 4001
+    group: media_write
+    gid: 4001
+  - user: media_read
+    uid: 4002
+    group: media_read
+    gid: 4002
+  - user: misc_write
+    uid: 4003
+    group: misc_write
+    gid: 4003
+  - user: misc_read
+    uid: 4004
+    group: misc_read
+    gid: 4004

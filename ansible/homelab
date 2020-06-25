@@ -6,7 +6,7 @@ melissa
 [virt_vm_manager]
 melissa
 
-[nfs_server]
+[samba_server]
 melissa
 
 [rasbian]
