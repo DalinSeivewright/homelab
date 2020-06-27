@@ -1,0 +1,76 @@
+
+# TODO Clean this up.  It probably shouldn't -all- be in this.  User and Groups can be separate roles or part of the playbook
+
+- name: Add Mounting Groups
+  group:
+    name: "{{ item.group }}"
+    state: present
+    system: no
+    gid: "{{ item.gid }}"
+  loop: "{{ config.exports | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', nfs_share_users, 'user') }}"
+
+- name: Add Mounting Users
+  user:
+    group: "{{ item.group }}"
+    uid: "{{ item.uid }}"
+    name: "{{ item.user }}"
+    create_home: false
+    shell: /bin/bash
+    state: present
+    system: no
+  loop: "{{ config.exports | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', nfs_share_users, 'user') }}"
+
+- name: Install NFS Server
+  apt:
+    name: nfs-kernel-server
+    state: latest
+    force_apt_get: yes
+    update_cache: no
+  notify:
+    - restart nfs server
+
+- name: Open UFW Ports
+  include_role:
+    name: ufw_open_port
+  vars:
+    port_to_open: '2048'
+
+- name: NFS Export Folders
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: nobody
+    group: nogroup
+  loop: "{{ config.exports }}"
+  notify:
+    - restart nfs server
+
+- name: Generate Configuration for NFS Exports
+  template:
+    src: templates/exports.j2
+    dest: /etc/exports
+    mode: u+r
+  vars:
+    nfs_exports_paths: "{{ nfs_server.exports }}"
+  notify:
+    - restart nfs server
+
+- name: Establish ACLs Masks
+  acl:
+    path: "{{ item.path }}"
+    etype: mask
+    permissions: rw
+    state: present
+    default: no
+  loop: "{{ config.exports | reversemultimap('path', 'users', 'user') }}"
+
+- name: Establish ACLs
+  acl:
+    path: "{{ item.path }}"
+    entity: "{{ item.user.user }}"
+    etype: user
+    permissions: "{{ item.user.permissions }}"
+    default: no
+    state: present
+  loop: "{{ config.exports | reversemultimap('path', 'users', 'user') }}"
+
