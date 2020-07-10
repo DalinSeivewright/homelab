@@ -1,0 +1,16 @@
+- name: Add Service Group
+  group:
+    name: "{{ group }}"
+    state: present
+    system: no
+    gid: "{{ gid }}"
+
+- name: Add Service User
+  user:
+    group: "{{ group }}"
+    uid: "{{ uid }}"
+    name: "{{ user }}"
+    create_home: false
+    shell: /bin/false
+    state: present
+    system: no

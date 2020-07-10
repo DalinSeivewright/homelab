@@ -9,6 +9,9 @@ melissa
 [samba_server]
 melissa
 
+[docker_host]
+melissa
+
 [rasbian]
 inclement-monitor
 eternal-spring

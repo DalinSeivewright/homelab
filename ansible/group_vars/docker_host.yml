@@ -1,0 +1,4 @@
+docker_user: docker-manager
+docker_uid: 6000
+docker_group: docker-manager
+docker_gid: 6000
