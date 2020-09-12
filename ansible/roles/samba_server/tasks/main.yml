@@ -1,12 +1,11 @@
-# - name: Install Samba
-#   apt:
-#     name: samba
-#     state: latest
-#     force_apt_get: yes
-#     update_cache: no
-#   notify:
-#     - restart samba
-#
+- name: Install Samba
+  apt:
+    name: samba
+    state: latest
+    force_apt_get: yes
+    update_cache: no
+  notify:
+    - restart samba
 
 - name: Add Mount Groups
   group:

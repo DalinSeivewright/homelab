@@ -42,3 +42,11 @@ samba_server:
           read_only: no
         - user: media_read
           read_only: yes
+    - name: video_share
+      path: /mnt/md1/shares/videos
+      group: video_share
+      users:
+        - user: media_write
+          read_only: no
+        - user: media_read
+          read_only: yes

@@ -1,0 +1,10 @@
+- name: Install VIRT and extras
+  apt:
+    state: present
+    name:
+      - qemu-kvm
+      - libvirt-daemon-system
+      - libvirt-clients
+      - bridge-utils
+      - qemu-utils
+      - libguestfs-tools

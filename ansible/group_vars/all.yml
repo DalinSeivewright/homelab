@@ -18,6 +18,8 @@ share_groups:
     gid: 5003
   - group: picture_share
     gid: 5004
+  - group: video_share
+    gid: 5005
 
 share_users:
   - user: backup_user

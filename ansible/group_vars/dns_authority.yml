@@ -48,6 +48,12 @@ dns_forward_zones:
           host: 210
         - name: rpi-4-05
           host: 211
+        - name: tester
+          host: 206
+        - name: wee
+          host: 206
+        - name: music
+          host: 206
 
 dns_reverse_zones:
   - forward_zone: oni.logichromatic.ca.
