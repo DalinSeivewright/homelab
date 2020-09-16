@@ -2,3 +2,7 @@ docker_user: docker-manager
 docker_uid: 6000
 docker_group: docker-manager
 docker_gid: 6000
+
+docker_volume_root: /home/{{provision_user}}
+docker_container_user_uid: 911
+docker_container_user_gid: 1000

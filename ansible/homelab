@@ -12,6 +12,9 @@ melissa
 [docker_host]
 melissa
 
+[reverse_proxy]
+melissa
+
 [rasbian]
 inclement-monitor
 eternal-spring

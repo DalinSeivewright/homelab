@@ -50,3 +50,5 @@ samba_server:
           read_only: no
         - user: media_read
           read_only: yes
+
+docker_volume_root: /mnt/md1/docker_volumes

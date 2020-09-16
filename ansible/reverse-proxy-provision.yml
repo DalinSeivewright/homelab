@@ -1,0 +1,113 @@
+- hosts: "reverse_proxy"
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Check Docker
+    become: yes
+    command: "docker --version"
+    ignore_errors: yes
+    register: docker_result
+    changed_when: False
+
+  - name: Test
+    debug:
+      var: "[docker_volume_root, reverse_proxy_docker_folder] | path_join"
+
+  - name: Grab Docker User Subuid Start Range
+    command: "grep -Po 'docker-manager:\\K[0-9]+' /etc/subuid"
+    register: docker_subuid_start
+
+  - name: Test 2
+    debug:
+      var: "(docker_subuid_start.stdout | int) + docker_container_user_uid"
+
+  - name: Ensure docker host group and docker installed
+    fail:
+      msg: "{{ inventory_hostname }} must be part of the docker_host group and docker-provision.yml must have been run!"
+    when: "'docker_host' not in group_names or docker_result is failed"
+
+  - name: Clone Reverse Proxy Repo Project
+    connection: local
+    become: no
+    git:
+      repo : "{{ reverse_proxy_repo }}"
+      dest : /tmp/nginx-reverse-proxy
+      key_file: "{{ansible_ssh_private_key_file}}"
+
+  - name: Create reverse proxy docker volume folder
+    file:
+      path: "{{ docker_volume_path }}"
+      state: directory
+
+  - name: Create Config
+    template:
+      src: ../../nginx-reverse-proxy/nginx-compose.yml.j2
+      dest: "{{ [docker_volume_path, 'nginx-compose.yml'] | path_join }}"
+      mode: u+r
+    vars:
+      data_root: "{{ [docker_volume_path, 'data'] | path_join }}"
+
+
+  - name: Create Certs folder for Reverse Proxy Project
+    connection: local
+    become: no
+    file:
+      path: /tmp/nginx-reverse-proxy/config/ssl/certs
+      state: directory
+
+  - name: Generate dhparam
+    connection: local
+    become: no
+    openssl_dhparam:
+      path: /tmp/nginx-reverse-proxy/config/ssl/certs/dhparam.pem
+      size: 4096
+
+  - name: Create Default site cert folder for Reverse Proxy Project
+    connection: local
+    become: no
+    file:
+      path: /tmp/nginx-reverse-proxy/config/ssl/certs/default
+      state: directory
+
+
+  - name: Generate private key
+    connection: local
+    become: no
+    openssl_privatekey:
+      path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.key
+      size: 4096
+      type: RSA
+
+  - name: Generate CSR
+    connection: local
+    become: no
+    openssl_csr:
+      path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.csr
+      privatekey_path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.key
+      common_name: default
+
+  - name: Generate Default Certs
+    connection: local
+    become: no
+    openssl_certificate:
+      path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.crt
+      csr_path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.csr
+      privatekey_path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.key
+      provider: selfsigned
+      selfsigned_not_after: "{{ ssl_cert_expire_date }}"
+
+  - name: Synchronize Required Files
+    synchronize:
+      src: /tmp/nginx-reverse-proxy/config
+      dest: "{{ [docker_volume_path, 'data'] | path_join }}"
+      delete: no
+      owner: no
+      group: no
+
+  - name: Change ownerships to docker container user (whoever decided not to accept UID and GID with file needs to be reprimanded)
+    command: "chown -R {{ (docker_subuid_start.stdout | int) + docker_container_user_uid }}:{{ (docker_subuid_start.stdout | int) + docker_container_user_uid }} {{ [docker_volume_path, 'data'] | path_join | quote }}"
+
+  vars:
+    docker_volume_path: "{{ [docker_volume_root, reverse_proxy_docker_folder] | path_join }}"
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

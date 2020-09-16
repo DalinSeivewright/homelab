@@ -42,3 +42,5 @@ share_users:
     uid: 4004
     group: misc_read
     gid: 4004
+
+ssl_cert_expire_date: 20211008000000Z
