@@ -15,6 +15,9 @@ melissa
 [reverse_proxy]
 melissa
 
+[application_jellyfin]
+melissa
+
 [rasbian]
 inclement-monitor
 eternal-spring

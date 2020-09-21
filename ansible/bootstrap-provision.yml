@@ -35,6 +35,7 @@
       provision_public_key_path: "{{ provision_public_key | realpath }}"
       ansible_ssh_pass: "{{ default_password }}"
       ansible_sudo_pass: "{{ default_password }}"
+    when: ssh_result is failed
 
   - name: Remove Default User
     include_role:
@@ -42,6 +43,7 @@
     vars:
       ansible_user: "{{ provision_user }}"
       ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+    when: ssh_result is failed
   vars:
     ansible_user: "{{ default_user }}"
     ansible_ssh_pass: "{{ default_password }}"

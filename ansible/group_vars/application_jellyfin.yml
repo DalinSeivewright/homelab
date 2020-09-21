@@ -1,0 +1,10 @@
+jellyfin_docker_folder: jellyfin
+jellyfin_repo: git@github.com:DalinSeivewright/application_jellyfin.git
+jellyfin_extra_mounts:
+  - /mnt/md1/shares/music:/data/music:ro
+  - /mnt/md1/shares/movies:/data/movies:ro
+  - /mnt/md1/shares/tv:/data/tv:ro
+  - /mnt/md1/shares/videos:/data/videos:ro
+jellyfin_reverse_proxy_server_name: music.oni.logichromatic.ca
+jellyfin_reverse_proxy_host: melissa
+jellyfin_reverse_proxy_site_name: music
