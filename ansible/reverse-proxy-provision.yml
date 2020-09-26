@@ -64,7 +64,6 @@
       state: directory
     notify: Restart Reverse Proxy
 
-
   - name: Generate private key
     connection: local
     become: no
@@ -109,18 +108,14 @@
   - name: Create Docker Internal Proxy Network
     command: "docker network create internal-proxy"
     notify: Restart Reverse Proxy
-    
-  - name: Open UFW HTTP Ports
-    include_role:
-      name: ufw_open_port
-    vars:
-      port_to_open: '80'
 
-  - name: Open UFW HTTP Ports
+  - name: Open UFW HTTP/S Ports
     include_role:
-      name: ufw_open_port
+      name: ufw_open_ports
     vars:
-      port_to_open: '443'
+      ufw_open_ports_ports:
+        - '80'
+        - '443'
 
   handlers:
     - name: Restart Reverse Proxy

@@ -1,12 +1,14 @@
 - name: Enable Main DNS Port
   include_role:
-    name: ufw_open_port
+    name: ufw_open_ports
   vars:
-    port_to_open: '53'
+    ufw_open_ports_ports:
+      - '53'
 
 - name: Enable Authority DNS Port (if recursor also exists on this host)
   include_role:
-    name: ufw_open_port
+    name: ufw_open_ports
   vars:
-    port_to_open: '54'
+    ufw_open_ports_ports:
+      - '54'
   when: ('dns_recursor' in group_names) and ('dns_authority' in group_names)

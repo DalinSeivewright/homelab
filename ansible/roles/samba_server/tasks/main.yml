@@ -47,31 +47,15 @@
   loop: "{{ config | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', share_users, 'user') }}"
   register: test
 
-# TODO Change this to allow an array!
 - name: Open UFW Ports
   include_role:
-    name: ufw_open_port
+    name: ufw_open_ports
   vars:
-    port_to_open: '445'
-
-- name: Open UFW Ports
-  include_role:
-    name: ufw_open_port
-  vars:
-    port_to_open: '135'
-
-- name: Open UFW Ports
-  include_role:
-    name: ufw_open_port
-  vars:
-    port_to_open: '136'
-
-- name: Open UFW Ports
-  include_role:
-    name: ufw_open_port
-  vars:
-    port_to_open: '137'
-
+    ufw_open_ports_ports:
+      - '445'
+      - '135'
+      - '136'
+      - '137'
 
 - name: Create Samba Share Folders
   file:
@@ -93,4 +77,3 @@
     shares: "{{ config }}"
   notify:
     - restart samba
-

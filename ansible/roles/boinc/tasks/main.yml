@@ -7,9 +7,10 @@
 
 - name: Open Remote Control Port
   include_role:
-    name: ufw_open_port
+    name: ufw_open_ports
   vars:
-    port_to_open: "31416"
+    ufw_open_ports_ports:
+      - "31416"
   when: installing
 
 - name: Generate Configuration for Boinc Client
