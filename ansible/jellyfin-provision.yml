@@ -46,24 +46,31 @@
       mode: u+r
     vars:
       expose_ports: "{{ inventory_hostname != jellyfin_reverse_proxy_host }}"
-    notify: Restart Jellyfin
+    notify:
+      - Restart Jellyfin
 
   - name: Change ownerships to docker container user (whoever decided not to accept UID and GID with file needs to be reprimanded)
     command: "chown -R {{ (docker_subuid_start.stdout | int) + docker_container_user_uid }}:{{ (docker_subuid_start.stdout | int) + docker_container_user_uid }} {{ [docker_volume_path, 'data'] | path_join | quote }}"
+    notify:
+      - Restart Jellyfin
 
   - name: Reverse Proxy ensure site folder creation
     file:
       path: "{{ docker_reverse_proxy_site_path}}"
       state: directory
     delegate_to: "{{ jellyfin_reverse_proxy_host }}"
-    notify: Restart Reverse Proxy
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
 
   - name: Reverse Proxy ensure certs folder creation
     file:
       path: "{{ docker_reverse_proxy_cert_path }}"
       state: directory
     delegate_to: "{{ jellyfin_reverse_proxy_host }}"
-    notify: Restart Reverse Proxy
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
 #  Android still won't trust this but might as well keep it
 # Need to clean all of this up!!!
   - name: Generate Root CA Key
@@ -72,7 +79,10 @@
       size: 4096
       type: RSA
     delegate_to: "{{ jellyfin_reverse_proxy_host }}"
-    notify: Restart Reverse Proxy
+    when: jellyfin_self_signed_certs
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
 
   - name: Create CA CSR
     openssl_csr:
@@ -81,7 +91,10 @@
       common_name: "oni.logichromatic.ca"
       basic_constraints: CA:TRUE
     delegate_to: "{{ jellyfin_reverse_proxy_host }}"
-    notify: Restart Reverse Proxy
+    when: jellyfin_self_signed_certs
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
 
   - name: Generate Root CRT
     openssl_certificate:
@@ -91,7 +104,10 @@
       provider: selfsigned
       selfsigned_not_after: "{{ ssl_cert_expire_date }}"
     delegate_to: "{{ jellyfin_reverse_proxy_host }}"
-    notify: Restart Reverse Proxy
+    when: jellyfin_self_signed_certs
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
 
   - name: Reverse Proxy Generate Key
     openssl_privatekey:
@@ -99,7 +115,10 @@
       size: 4096
       type: RSA
     delegate_to: "{{ jellyfin_reverse_proxy_host }}"
-    notify: Restart Reverse Proxy
+    when: jellyfin_self_signed_certs
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
 
   - name: Reverse Proxy Generate CSR
     openssl_csr:
@@ -108,7 +127,10 @@
       common_name: "{{ jellyfin_reverse_proxy_server_name }}"
       basic_constraints: CA:TRUE
     delegate_to: "{{ jellyfin_reverse_proxy_host }}"
-    notify: Restart Reverse Proxy
+    when: jellyfin_self_signed_certs
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
 
   - name: Reverse Proxy Generate CRT
     openssl_certificate:
@@ -120,7 +142,43 @@
       provider: ownca
       selfsigned_not_after: "{{ ssl_cert_expire_date }}"
     delegate_to: "{{ jellyfin_reverse_proxy_host }}"
-    notify: Restart Reverse Proxy
+    when: jellyfin_self_signed_certs
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
+
+  - name: Create Certbot Cert
+    include_role:
+      name: reverse_proxy_certbot
+      apply:
+        delegate_to: "{{ jellyfin_reverse_proxy_host }}"
+    vars:
+      reverse_proxy_config_path: "{{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}}"
+      reverse_proxy_domain: "{{jellyfin_reverse_proxy_server_name}}"
+      reverse_proxy_cert_renew: no
+    when: not jellyfin_self_signed_certs
+
+  - name: Copy Private Key
+    copy:
+      src: "/etc/letsencrypt/live/{{jellyfin_reverse_proxy_server_name}}/privkey.pem"
+      dest: "{{certbot_key_path}}"
+      remote_src: yes
+    when: not jellyfin_self_signed_certs
+    delegate_to: "{{ jellyfin_reverse_proxy_host }}"
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
+
+  - name: Copy Cert
+    copy:
+      src: "/etc/letsencrypt/live/{{jellyfin_reverse_proxy_server_name}}/fullchain.pem"
+      dest: "{{certbot_cert_path}}"
+      remote_src: yes
+    when: not jellyfin_self_signed_certs
+    delegate_to: "{{ jellyfin_reverse_proxy_host }}"
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
 
   - name: Reverse Proxy Create Site Config
     template:
@@ -129,8 +187,12 @@
       mode: u+r
     vars:
       proxy_target: "{{'jellyfin' if inventory_hostname == jellyfin_reverse_proxy_host else inventory_hostname}}"
+      jellyfin_private_key_path: "{{ssl_key_path_in_container if jellyfin_self_signed_certs else certbot_key_path_in_container}}"
+      jellyfin_public_cert_path: "{{ssl_crt_path_in_container if jellyfin_self_signed_certs else certbot_cert_path_in_container}}"
     delegate_to: "{{ jellyfin_reverse_proxy_host }}"
-    notify: Restart Reverse Proxy
+    notify:
+      - Restart Reverse Proxy
+      - Restart Jellyfin
 
   - name: Reverse Proxy Chown proxy files
     command: "chown -R {{ (docker_subuid_start.stdout | int) + docker_container_user_uid }}:{{ (docker_subuid_start.stdout | int) + docker_container_user_uid }} {{ docker_reverse_proxy_volume_path | quote }}"
@@ -144,9 +206,17 @@
       command: "docker-compose -f {{[docker_volume_path, 'jellyfin-compose.yml'] | path_join | quote}} up -d --force-recreate"
   vars:
     docker_volume_path: "{{ [docker_volume_root, jellyfin_docker_folder] | path_join }}"
+    jellyfin_container_site_path: "{{['/data/config/sites', jellyfin_reverse_proxy_site_name] | path_join}}"
+    jellyfin_container_site_cert_path: "{{['/data/config/sites', jellyfin_reverse_proxy_site_name, 'certs'] | path_join}}"
     docker_reverse_proxy_volume_path: "{{ [docker_volume_root, reverse_proxy_docker_folder, 'data'] | path_join }}"
     docker_reverse_proxy_site_path: "{{[docker_reverse_proxy_volume_path, 'sites', jellyfin_reverse_proxy_site_name] | path_join}}"
     docker_reverse_proxy_cert_path: "{{[docker_reverse_proxy_site_path, 'certs'] | path_join}}"
+    certbot_key_path: "{{[docker_reverse_proxy_cert_path, jellyfin_reverse_proxy_site_name + '-privkey.pem'] | path_join}}"
+    certbot_cert_path: "{{[docker_reverse_proxy_cert_path, jellyfin_reverse_proxy_site_name + '-fullchain.pem'] | path_join}}"
+    certbot_key_path_in_container: "{{[jellyfin_container_site_cert_path, jellyfin_reverse_proxy_site_name + '-privkey.pem'] | path_join}}"
+    certbot_cert_path_in_container: "{{[jellyfin_container_site_cert_path, jellyfin_reverse_proxy_site_name + '-fullchain.pem'] | path_join}}"
+    ssl_key_path_in_container: "{{[jellyfin_container_site_cert_path, jellyfin_reverse_proxy_site_name + '-selfsigned.key'] | path_join}}"
+    ssl_crt_path_in_container: "{{[jellyfin_container_site_cert_path, jellyfin_reverse_proxy_site_name + '-selfsigned.crt'] | path_join}}"
     ssl_key_path: "{{[docker_reverse_proxy_cert_path, jellyfin_reverse_proxy_site_name + '-selfsigned.key'] | path_join}}"
     ssl_csr_path: "{{[docker_reverse_proxy_cert_path, jellyfin_reverse_proxy_site_name + '-selfsigned.csr'] | path_join}}"
     ssl_crt_path: "{{[docker_reverse_proxy_cert_path, jellyfin_reverse_proxy_site_name + '-selfsigned.crt'] | path_join}}"

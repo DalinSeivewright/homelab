@@ -1,0 +1,26 @@
+- name: Shut Off Reverse Proxy
+  command: "docker-compose -f {{reverse_proxy_config_path}} down"
+
+- name: Check if Cert Exists
+  stat:
+    path: "/etc/letsencrypt/live/{{reverse_proxy_domain}}/privkey.pem"
+  register: cert_stat
+
+- name: Create Cert if it does not exist
+  include_role:
+    name: certbot
+  vars:
+    certbot_domain: "{{reverse_proxy_domain}}"
+    certbot_renew: no
+  when: not cert_stat.stat.exists
+
+- name: Create Cert if it does not exist
+  include_role:
+    name: certbot
+  vars:
+    certbot_domain: "{{reverse_proxy_domain}}"
+    certbot_renew: yes
+  when: cert_stat.stat.exists and reverse_proxy_cert_renew
+
+- name: Turn On Reverse Proxy
+  command: "docker-compose -f {{reverse_proxy_config_path}} up -d"

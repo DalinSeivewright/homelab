@@ -1,4 +1,4 @@
-- hosts: "all"
+- hosts: "all,!droplet"
   gather_facts: no
   become: yes
   tasks:
@@ -50,7 +50,7 @@
     ansible_sudo_pass: "{{ default_password }}"
 
 # TODO Cleanup - we can do this nicer in the hosts filter
-- hosts: "all"
+- hosts: "all,!droplet"
   serial: 1
   gather_facts: no
   become: yes

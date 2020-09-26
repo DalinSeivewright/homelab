@@ -8,3 +8,4 @@ jellyfin_extra_mounts:
 jellyfin_reverse_proxy_server_name: music.oni.logichromatic.ca
 jellyfin_reverse_proxy_host: melissa
 jellyfin_reverse_proxy_site_name: music
+jellyfin_self_signed_certs: yes

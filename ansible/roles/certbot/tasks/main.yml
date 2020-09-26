@@ -1,0 +1,25 @@
+- name: Add Certbot PPA
+  apt_repository:
+    repo: ppa:certbot/certbot
+    update_cache: yes
+    state: present
+
+- name: Install Certbot
+  apt:
+    pkg:
+      - certbot
+    state: latest
+
+- name: Grab Cert Props
+  include_vars:
+    file: ../../../vars/certbot.yml
+    name: certbot
+  when: not certbot_renew
+
+- name: Generate Cert
+  command: "certbot certonly --standalone --non-interactive --agree-tos -m {{certbot.certbot_email}} -d {{certbot_domain}}"
+  when: not certbot_renew
+
+- name: Renew Certs
+  command: "certbot renew"
+  when: certbot_renew

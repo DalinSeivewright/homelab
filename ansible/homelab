@@ -1,4 +1,7 @@
 
+[droplet]
+droplet-jellyfin
+
 [ubuntu]
 auntie-dot
 melissa
@@ -11,12 +14,15 @@ melissa
 
 [docker_host]
 melissa
+droplet-jellyfin
 
 [reverse_proxy]
 melissa
+droplet-jellyfin
 
 [application_jellyfin]
 melissa
+droplet-jellyfin
 
 [rasbian]
 inclement-monitor
