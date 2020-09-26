@@ -14,7 +14,7 @@
   hostname = ""
 
 
-{% if rpi_stat_collector == true %}
+{% if telegraf_rpi_stat_collector == True %}
 [[inputs.exec]]
   # Commands array
   commands = [ "/usr/local/bin/rpi-stats.sh" ]

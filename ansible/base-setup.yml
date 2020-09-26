@@ -1,0 +1,48 @@
+- hosts: "all,!droplet"
+  serial: 1
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Base Rasbian Setup
+    include_role:
+      name: rasbian
+    when: "'rasbian' in group_names"
+
+  - name: Base Ubuntu Setup
+    include_role:
+      name: ubuntu
+    when: "'ubuntu' in group_names"
+  vars:
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+
+- hosts: "droplet"
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Update and Upgrade
+    include_role:
+      name: update_upgrade
+  - name: Enable UFW and Default rules
+    include_role:
+      name: ufw_default
+  vars:
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
+
+- hosts: telegraf
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Install Telegraf
+      include_role:
+        name: telegraf
+      vars:
+        telegraf_rpi_stat_collector: "{{'rasbian' in group_names}}"
+        telegraf_url: "{{influxdb_url}}"
+        telegraf_database: "{{influxdb_database}}"
+        telegraf_user: "{{influxdb_user}}"
+        telegraf_password: "{{influxdb_password}}"
+  vars:
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
