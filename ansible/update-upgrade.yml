@@ -1,5 +1,6 @@
 - hosts: all
   become: yes
+  strategy: free
   tasks:
   - name: Update and Upgrade
     include_role:

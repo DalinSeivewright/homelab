@@ -1,27 +1,27 @@
 {
   "servers": [
-  {% for server in servers %}
+  {% for server in neopixel_healthchecker_hosts %}
     "{{server}}"{{ "," if not loop.last else ""}}
   {% endfor %}
   ],
-  "file": "{{file}}",
-  "timeout": "{{timeout}}",
-  "pixels": "{{pixels}}",
+  "file": "{{neopixel_healthchecker_status_file}}",
+  "timeout": "{{neopixel_healthchecker_ping_timeout}}",
+  "pixels": "{{neopixel_healthchecker_pixel_count}}",
   "colors": {
     "alive": {
-      "r": 1,
-      "g": 1,
-      "b": 1
+      "r": {{neopixel_healthchecker_colors.alive.r}},
+      "g": {{neopixel_healthchecker_colors.alive.g}},
+      "b": {{neopixel_healthchecker_colors.alive.b}}
     },
     "dead": {
-      "r": 1,
-      "g": 0,
-      "b": 0
+      "r": {{neopixel_healthchecker_colors.dead.r}},
+      "g": {{neopixel_healthchecker_colors.dead.g}},
+      "b": {{neopixel_healthchecker_colors.dead.b}}
     },
     "updating": {
-      "r": 0,
-      "g": 0,
-      "b": 1
+      "r": {{neopixel_healthchecker_colors.updating.r}},
+      "g": {{neopixel_healthchecker_colors.updating.g}},
+      "b": {{neopixel_healthchecker_colors.updating.b}}
     }
   }
 }

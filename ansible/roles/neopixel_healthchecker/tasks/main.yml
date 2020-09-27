@@ -17,25 +17,26 @@
   pip:
     name:
       - git+https://github.com/DalinSeivewright/neopixel-healthchecker.git
+    state: latest
 
 - name: Create Neopixel Health Checker folder
   file:
-    path: "/home/{{provision_user}}/.healthchecker/"
+    path: "{{neopixel_healthchecker_config_folder | quote}}"
     state: directory
 
 - name: Create health check script config file
   template:
     src: templates/neopixel-healthchecker.json.j2
-    dest: "/home/{{provision_user}}/.healthchecker/neopixel-healthchecker.json"
+    dest: "{{ [neopixel_healthchecker_config_folder, neopixel_healthchecker_config_file_name] | path_join | quote }}"
     mode: u+r
   vars:
-    servers: "{{healthchecker_hosts}}"
-    timeout: "{{healthchecker_ping_timeout}}"
-    file: "{{healthchecker_status_file}}"
-    pixels: "{{healthchecker_pixel_count}}"
+    servers: "{{neopixel_healthchecker_hosts}}"
+    timeout: "{{neopixel_healthchecker_ping_timeout}}"
+    file: "{{neopixel_healthchecker_status_file}}"
+    pixels: "{{neopixel_healthchecker_pixel_count}}"
 
 - name: Add cron job for health checker
   cron:
     name: "Neopixel Healthchecker"
-    job: "python3 /home/{{provision_user}}/.local/bin/neopixel-healthchecker.py -c /home/{{provision_user}}/.healthchecker/neopixel-healthchecker.json"
+    job: "python3 /home/{{ansible_user}}/.local/bin/neopixel-healthchecker.py -c {{[neopixel_healthchecker_config_folder, neopixel_healthchecker_config_file_name] | path_join | quote}}"
     state: present

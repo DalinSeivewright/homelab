@@ -1,4 +1,4 @@
-healthchecker_hosts:
+neopixel_healthchecker_hosts:
   - superintendent
   - athena
   - ap
@@ -14,6 +14,7 @@ healthchecker_hosts:
   - melissa
   - rpi-2-01
   - rpi-2-02
-healthchecker_status_file: /tmp/neopixel-healthchecker-statuses.json
-healthchecker_ping_timeout: 1
-healthchecker_pixel_count: 15
+neopixel_healthchecker_status_file: /tmp/neopixel-healthchecker-statuses.json
+neopixel_healthchecker_ping_timeout: 1
+neopixel_healthchecker_pixel_count: 15
+neopixel_healthchecker_config_folder: "/home/{{ansible_user}}/.healthchecker"

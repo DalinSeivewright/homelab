@@ -6,7 +6,7 @@
       include_role:
         name: telegraf
       vars:
-        rpi_stat_collector: "{{'rasbian' in group_names}}"
+      telegraf_rpi_stat_collector: "{{'rasbian' in group_names}}"
         telegraf_url: "{{influxdb_url}}"
         telegraf_database: "{{influxdb_database}}"
         telegraf_user: "{{influxdb_user}}"
