@@ -32,7 +32,9 @@
     include_role:
       name: bootstrap_user
     vars:
-      provision_public_key_path: "{{ provision_public_key | realpath }}"
+      bootstrap_user_user: "{{provision_user}}"
+      bootstrap_user_group: "{{provision_group}}"
+      bootstrap_user_public_key_path: "{{ provision_public_key | realpath }}"
       ansible_ssh_pass: "{{ default_password }}"
       ansible_sudo_pass: "{{ default_password }}"
     when: ssh_result is failed
@@ -85,7 +87,9 @@
     include_role:
       name: bootstrap_user
     vars:
-      provision_public_key_path: "{{ provision_public_key | realpath }}"
+      bootstrap_user_user: "{{provision_user}}"
+      bootstrap_user_group: "{{provision_group}}"
+      bootstrap_user_public_key_path: "{{ provision_public_key | realpath }}"
     when: ssh_result is failed
   vars:
     ansible_user: "{{ default_user }}"

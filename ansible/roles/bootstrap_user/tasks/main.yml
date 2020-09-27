@@ -1,24 +1,24 @@
 - name: Add Provision Group
   group:
-    name: "{{ provision_group }}"
+    name: "{{ bootstrap_user_group }}"
     state: present
     system: no
 
 - name: Add Provisioning User
   user:
-    group: "{{ provision_group }}"
+    group: "{{ bootstrap_user_group }}"
     groups: "sudo"
-    name: "{{ provision_user }}"
+    name: "{{ bootstrap_user_user }}"
     create_home: true
     shell: /bin/bash
     state: present
 
 - name: Copy Provisioning User Key
   authorized_key:
-    user: "{{ provision_user }}"
+    user: "{{ bootstrap_user_user }}"
     state: present
-    path: "/home/{{ provision_user }}/.ssh/authorized_keys"
-    key: "{{ lookup('file','{{ provision_public_key_path }}') }}"
+    path: "/home/{{ bootstrap_user_user }}/.ssh/authorized_keys"
+    key: "{{ lookup('file','{{ bootstrap_user_public_key_path }}') }}"
 
 - name: Create Provisioning Sudoers file
   file:
@@ -31,7 +31,7 @@
 
 - name: Enable Passwordless Sudo for Provisioning
   lineinfile:
-    dest: "/etc/sudoers.d/{{ provision_user }}"
-    line: "{{provision_user}} ALL=(ALL) NOPASSWD: ALL"
+    dest: "/etc/sudoers.d/{{ bootstrap_user_user }}"
+    line: "{{bootstrap_user_user}} ALL=(ALL) NOPASSWD: ALL"
     state: present
     validate: "visudo --check --file=%s"

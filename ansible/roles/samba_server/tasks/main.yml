@@ -13,7 +13,7 @@
     state: present
     system: no
     gid: "{{ item.gid }}"
-  loop: "{{ config | maplistwithlistlookup('group', share_groups, 'group') }}"
+  loop: "{{ samba_server_shares | maplistwithlistlookup('group', samba_server_share_groups, 'group') }}"
 
 - name: Add Share Groups
   group:
@@ -21,7 +21,7 @@
     state: present
     system: no
     gid: "{{ item.gid }}"
-  loop: "{{ config | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', share_users, 'user') }}"
+  loop: "{{ samba_server_shares | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', samba_server_share_users, 'user') }}"
 #TODO Add share group to users in share list
 - name: Add Share Users
   user:
@@ -32,19 +32,19 @@
     shell: /bin/bash
     state: present
     system: no
-  loop: "{{ config | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', share_users, 'user') }}"
+  loop: "{{ samba_server_shares | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', samba_server_share_users, 'user') }}"
 
 - name: Add Share Group to Share Users
   user:
     groups: "{{ item.group }}"
     name: "{{ item.user.user }}"
     append: yes
-  loop: "{{ config | reversemultimap('group', 'users', 'user') }}"
+  loop: "{{ samba_server_shares | reversemultimap('group', 'users', 'user') }}"
 
 # TODO Secrets Secrets...  Manual password change after for now
 - name: Set Samba Passwords
   shell: "printf 'test\ntest\n' | smbpasswd -L -s -a {{item.user}}"
-  loop: "{{ config | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', share_users, 'user') }}"
+  loop: "{{ samba_server_shares | reversemultimap('path', 'users', 'user') | map(attribute='user') | maplistwithlistlookup('user', samba_server_share_users, 'user') }}"
   register: test
 
 - name: Open UFW Ports
@@ -64,7 +64,7 @@
     owner: nobody
     group: "{{ item.group }}"
     mode: g+rw
-  loop: "{{ config }}"
+  loop: "{{ samba_server_shares }}"
   notify:
     - restart samba
 
@@ -74,6 +74,6 @@
     dest: /etc/samba/smb.conf
     mode: u+r
   vars:
-    shares: "{{ config }}"
+    shares: "{{ samba_server_shares }}"
   notify:
     - restart samba

@@ -6,7 +6,9 @@
     include_role:
       name: samba_server
     vars:
-      config: "{{samba_server.shares}}"
+      samba_server_shares: "{{samba_server.shares}}"
+      samba_server_share_groups: "{{share_groups}}"
+      samba_server_share_users: "{{share_users}}"
   vars:
     ansible_user: "{{ provision_user }}"
     ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
