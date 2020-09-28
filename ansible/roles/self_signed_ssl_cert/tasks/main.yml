@@ -1,0 +1,28 @@
+- name: Reverse Proxy Generate Key
+  openssl_privatekey:
+    path: "{{self_signed_ssl_cert_key_path}}"
+    size: 4096
+    type: RSA
+  delegate_to: "{{ self_signed_ssl_cert_delegate_to }}"
+  notify: "{{ self_signed_ssl_cert_notifies }}"
+
+- name: Reverse Proxy Generate CSR
+  openssl_csr:
+    path: "{{self_signed_ssl_cert_csr_path}}"
+    privatekey_path: "{{self_signed_ssl_cert_key_path}}"
+    common_name: "{{ self_signed_ssl_cert_common_name }}"
+  delegate_to: "{{ self_signed_ssl_cert_delegate_to }}"
+  notify: "{{ self_signed_ssl_cert_notifies }}"
+
+- name: Reverse Proxy Generate CRT
+  openssl_certificate:
+    path: "{{self_signed_ssl_cert_crt_path}}"
+    csr_path: "{{self_signed_ssl_cert_csr_path}}"
+    privatekey_path: "{{self_signed_ssl_cert_key_path}}"
+    # ownca_path: "{{[docker_reverse_proxy_cert_path, 'root-ca.crt'] | path_join}}"
+    # ownca_privatekey_path: "{{[docker_reverse_proxy_cert_path, 'root-ca.key'] | path_join}}"
+    # provider: ownca
+    provider: selfsigned
+    selfsigned_not_after: "{{ self_signed_ssl_cert_expire_date }}"
+  delegate_to: "{{ self_signed_ssl_cert_delegate_to }}"
+  notify: "{{ self_signed_ssl_cert_notifies }}"
