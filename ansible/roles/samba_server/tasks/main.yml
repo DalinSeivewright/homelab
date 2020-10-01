@@ -5,7 +5,7 @@
     force_apt_get: yes
     update_cache: no
   notify:
-    - restart samba
+    - smbd | restart
 
 - name: Add Mount Groups
   group:
@@ -66,7 +66,7 @@
     mode: g+rw
   loop: "{{ samba_server_shares }}"
   notify:
-    - restart samba
+    - smbd | restart
 
 - name: Generate Configuration for Samba Config
   template:
@@ -76,4 +76,4 @@
   vars:
     shares: "{{ samba_server_shares }}"
   notify:
-    - restart samba
+    - smbd | restart

@@ -4,6 +4,7 @@
     state: latest
     force_apt_get: yes
     update_cache: yes
+
 - name: Enable UFW
   ufw:
     state: enabled
@@ -12,28 +13,28 @@
   ufw:
     rule: allow
     port: "22"
-  notify: "reload ufw"
+  notify: ufw | reload
 
 - name: Enable NTP
   ufw:
     rule: allow
     port: "123"
-  notify: "reload ufw"
+  notify: ufw | reload
 
 - name: Enable DHCP bootps
   ufw:
     rule: allow
     port: "67"
-  notify: "reload ufw"
+  notify: ufw | reload
 
 - name: Enable DHCP bootpc
   ufw:
     rule: allow
     port: "68"
-  notify: "reload ufw"
+  notify: ufw | reload
 
 - name: Disable Incoming Ports
   ufw:
     default: deny
     direction: incoming
-  notify: "reload ufw"
+  notify: ufw | reload

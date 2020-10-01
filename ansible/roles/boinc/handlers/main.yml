@@ -1,4 +1,4 @@
-- name: restart boinc
+- name: boinc | restart
   service:
     name: boinc-client
     state: restarted

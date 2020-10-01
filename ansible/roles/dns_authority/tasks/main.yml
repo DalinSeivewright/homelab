@@ -15,14 +15,14 @@
     src: templates/pdns.conf.j2
     dest: /etc/powerdns/pdns.conf
     mode: u+r
-  notify: "restart pdns"
+  notify: pdns | restart
 
 - name: Generate Configuration for Zones
   template:
     src: templates/named.conf.j2
     dest: /etc/powerdns/bind/named.conf
     mode: u+r
-  notify: "restart pdns"
+  notify: pdns | restart
 
 - name: Generate Configuration for Local Zone
   template:
@@ -30,7 +30,7 @@
     dest: "/etc/powerdns/bind/{{ item.forward_zone[:-1] }}"
     mode: u+r
   loop: "{{ dns_forward_zones }}"
-  notify: "restart pdns"
+  notify: pdns | restart
 
 - name: Generate Configuration for Local Zone Reverse
   template:
@@ -38,4 +38,4 @@
     dest: "/etc/powerdns/bind/{{item.reverse_zone[:-1]}}"
     mode: u+r
   loop: "{{ dns_reverse_zones }}"
-  notify: "restart pdns"
+  notify: pdns | restart

@@ -1,4 +1,4 @@
-- name: Reload UFW
+- name: ufw | reload
   ufw:
     state: reloaded
   listen: "reload ufw"

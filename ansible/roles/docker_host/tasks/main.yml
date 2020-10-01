@@ -25,11 +25,11 @@
     state: latest
     force_apt_get: yes
     update_cache: yes
+  notify: docker | restart
 
 - name: Add Docker Daemon Config
   template:
     src: templates/daemon.json.j2
     dest: /etc/docker/daemon.json
     mode: u+r
-  notify:
-    - restart docker
+  notify: docker | restart

@@ -1,4 +1,4 @@
-- name: restart recursor
+- name: pdns-recursor | restart
   service:
     name: pdns-recursor
     state: restarted

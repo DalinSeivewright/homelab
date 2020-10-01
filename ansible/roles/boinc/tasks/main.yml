@@ -19,7 +19,7 @@
     dest: /var/lib/boinc-client/cc_config.xml
     mode: u+r
   notify:
-    - restart boinc
+    - boinc | restart
 
 - name: Generate Configuration for Boinc Client Preference Overrides
   template:
@@ -27,4 +27,4 @@
     dest: /var/lib/boinc-client/global_prefs_override.xml
     mode: u+r
   notify:
-    - restart boinc
+    - boinc | restart

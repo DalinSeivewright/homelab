@@ -42,5 +42,4 @@
     dest: /etc/telegraf/telegraf.conf
     mode: u+r
   notify:
-    - restart telegraf
-
+    - telegraf | restart
