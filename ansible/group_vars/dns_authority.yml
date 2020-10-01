@@ -18,7 +18,7 @@ dns_forward_zones:
           host: 2
         - name: ap
           host: 3
-        - name: zero
+        - name: lorelai
           host: 81
         - name: synology
           host: 100
@@ -74,7 +74,7 @@ dns_reverse_zones:
         host: 2
       - name: ap
         host: 3
-      - name: zero
+      - name: lorelai
         host: 81
       - name: synology
         host: 100

@@ -4,7 +4,7 @@ neopixel_healthchecker_hosts:
   - ap
   - synology
   - hue
-  - zero
+  - lorelai
   - auntie-dot
   - inclement-monitor
   - eternal-spring
