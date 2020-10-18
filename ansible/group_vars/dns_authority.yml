@@ -18,12 +18,12 @@ dns_forward_zones:
           host: 2
         - name: ap
           host: 3
+        - name: rebecca
+          host: 3
         - name: lorelai
           host: 81
         - name: synology
           host: 100
-        - name: hue
-          host: 101
         - name: auntie-dot
           host: 200
         - name: inclement-monitor
@@ -54,6 +54,8 @@ dns_forward_zones:
           host: 206
         - name: music
           host: 206
+        - name: omada-controler
+          host: 244
 
 dns_reverse_zones:
   - forward_zone: oni.logichromatic.ca.
@@ -78,8 +80,6 @@ dns_reverse_zones:
         host: 81
       - name: synology
         host: 100
-      - name: hue
-        host: 101
       - name: auntie-dot
         host: 200
       - name: inclement-monitor

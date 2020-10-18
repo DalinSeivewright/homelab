@@ -1,9 +1,6 @@
 neopixel_healthchecker_hosts:
   - superintendent
-  - athena
-  - ap
   - synology
-  - hue
   - lorelai
   - auntie-dot
   - inclement-monitor
@@ -14,6 +11,9 @@ neopixel_healthchecker_hosts:
   - melissa
   - rpi-2-01
   - rpi-2-02
+  - rpi-3-03
+  - rpi-3-04
+  - rpi-4-05
 neopixel_healthchecker_status_file: /tmp/neopixel-healthchecker-statuses.json
 neopixel_healthchecker_ping_timeout: 1
 neopixel_healthchecker_pixel_count: 15

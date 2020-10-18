@@ -1,0 +1,60 @@
+- hosts: "application_omada"
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Check Docker
+    become: yes
+    command: "docker --version"
+    ignore_errors: yes
+    register: docker_result
+    changed_when: False
+
+  - name: Ensure docker host group and docker installed
+    fail:
+      msg: "{{ inventory_hostname }} must be part of the docker_host group and docker-provision.yml must have been run!"
+    when: "'docker_host' not in group_names or docker_result is failed"
+
+  - name: Grab Docker User Subuid Start Range
+    command: "grep -Po 'docker-manager:\\K[0-9]+' /etc/subuid"
+    register: docker_subuid_start
+
+  - name: Clone Omada Project
+    connection: local
+    become: no
+    git:
+      repo : "{{ omada_repo }}"
+      dest : /tmp/application_omada
+      key_file: "{{ansible_ssh_private_key_file}}"
+
+  - name: Create omada docker volume folder
+    file:
+      path: "{{ docker_volume_path }}"
+      state: directory
+    notify: omada-controller | restart
+
+  - name: Create omada docker volume data folder
+    file:
+      path: "{{ [docker_volume_path, 'docker_data'] | path_join }}"
+      state: directory
+    notify: omada-controller | restart
+
+  - name: Create Config
+    template:
+      src: /tmp/application_omada/docker/omada-compose.yml.j2
+      dest: "{{ [docker_volume_path, 'omada-compose.yml'] | path_join }}"
+      mode: u+r
+    notify:
+      - omada-controller | restart
+
+  - name: Change ownerships to docker container user (whoever decided not to accept UID and GID with file needs to be reprimanded)
+    command: "chown -R {{ (docker_subuid_start.stdout | int) + docker_container_user_uid }}:{{ (docker_subuid_start.stdout | int) + docker_container_user_uid }} {{ [docker_volume_path, 'docker_data'] | path_join | quote }}"
+    notify:
+      - omada-controller | restart
+
+  handlers:
+    - name: omada-controller | restart
+      command: "docker-compose -f {{[docker_volume_path, 'omada-compose.yml'] | path_join | quote}} up -d --force-recreate"
+  vars:
+    docker_volume_path: "{{ [docker_volume_root, omada_docker_folder] | path_join }}"
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

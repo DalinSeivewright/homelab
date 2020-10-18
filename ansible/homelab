@@ -24,6 +24,9 @@ droplet-jellyfin
 melissa
 droplet-jellyfin
 
+[application_omada]
+melissa
+
 [rasbian]
 inclement-monitor
 eternal-spring
