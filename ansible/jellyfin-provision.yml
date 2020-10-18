@@ -19,7 +19,7 @@
     command: "grep -Po 'docker-manager:\\K[0-9]+' /etc/subuid"
     register: docker_subuid_start
 
-  - name: Clone Reverse Proxy Repo Project
+  - name: Clone Jellyfin Repo Project
     connection: local
     become: no
     git:
