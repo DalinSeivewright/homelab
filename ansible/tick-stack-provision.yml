@@ -1,0 +1,80 @@
+- hosts: "application_tick"
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Check Docker
+    become: yes
+    command: "docker --version"
+    ignore_errors: yes
+    register: docker_result
+    changed_when: False
+
+  - name: Debug test
+    debug:
+      var: docker_volume_service_roots
+
+  - name: Ensure docker host group and docker installed
+    fail:
+      msg: "{{ inventory_hostname }} must be part of the docker_host group and docker-provision.yml must have been run!"
+    when: "'docker_host' not in group_names or docker_result is failed"
+
+  - name: Grab Docker User Subuid Start Range
+    command: "grep -Po 'docker-manager:\\K[0-9]+' /etc/subuid"
+    register: docker_subuid_start
+
+  - name: Clone Tick Project
+    connection: local
+    become: no
+    git:
+      repo : "{{ tick_repo }}"
+      dest : /tmp/application_tick
+      key_file: "{{ansible_ssh_private_key_file}}"
+
+  - name: Create tick stack docker volume folder
+    file:
+      path: "{{ docker_volume_path }}"
+      state: directory
+    notify: tick-stack | restart
+
+  - name: Create tick stack docker volume data folder
+    file:
+      path: "{{ [docker_volume_path, 'docker_data'] | path_join }}"
+      state: directory
+    notify: tick-stack | restart
+
+  - name: Create Config
+    template:
+      src: /tmp/application_tick/docker/tick-compose.yml.j2
+      dest: "{{ [docker_volume_path, 'tick-compose.yml'] | path_join }}"
+      mode: u+r
+    notify:
+      - tick-stack | restart
+
+  - name: Create Docker Service Root paths
+    file:
+      path: "{{ item.path | quote }}"
+      state: directory
+    loop: "{{docker_volume_service_roots}}"
+    notify:
+      - tick-stack | restart
+
+  - name: Change ownerships to docker container user (whoever decided not to accept UID and GID with file needs to be reprimanded)
+    command: "chown {{ (docker_subuid_start.stdout | int) }}:{{ (docker_subuid_start.stdout | int) }} {{docker_volume_data_path | quote }}"
+    notify:
+      - tick-stack | restart
+
+  - name: Change ownerships to docker container user (whoever decided not to accept UID and GID with file needs to be reprimanded)
+    command: "chown -R {{ (docker_subuid_start.stdout | int) + item.uid | int }}:{{ (docker_subuid_start.stdout | int) + item.gid | int }} {{ item.path | quote }}"
+    loop: "{{docker_volume_service_roots}}"
+    notify:
+      - tick-stack | restart
+
+
+  handlers:
+    - name: tick-stack | restart
+      command: "docker-compose -f {{[docker_volume_path, 'tick-compose.yml'] | path_join | quote}} up -d --force-recreate"
+  vars:
+    docker_volume_path: "{{ [docker_volume_root, tick_docker_folder] | path_join }}"
+    docker_volume_data_path: "{{ [docker_volume_path, 'docker_data'] | path_join }}"
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

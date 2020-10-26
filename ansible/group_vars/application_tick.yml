@@ -1,0 +1,22 @@
+tick_docker_folder: tick
+tick_repo: git@github.com:DalinSeivewright/application_tick.git
+docker_volume_service_roots:
+  - path: "{{docker_volume_data_path}}/grafana"
+    uid: 0
+    gid: 0
+  - path: "{{docker_volume_data_path}}/grafana/data"
+    uid: 472
+    gid: 472
+  - path: "{{docker_volume_data_path}}/chronograf"
+    uid: 0
+    gid: 0
+    # This was stupid and I should move it tbh.
+  - path: "{{docker_volume_data_path}}/chronograf_shared"
+    uid: 0
+    gid: 0
+  - path: "{{docker_volume_data_path}}/influxdb"
+    uid: 0
+    gid: 0
+  - path: "{{docker_volume_data_path}}/kapacitor"
+    uid: 0
+    gid: 0
