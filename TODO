@@ -1,0 +1,10 @@
+TODO
+- Get rest of application_X roles up to date with how we are going to handle bind mounts + users... consider moving most of this config into vars.yml files in the specific application_x git repos
+- Maybe a new domain for web apps?  (Although maybe not - not all the webapps I'm dealing will be setup properly for cors)
+- Provision for k3s - trying rpis first
+- How are we going to handle persistent storage for when we get application deployment that isn't tied to a host?  I don't everything tied to this host or that host.  SAN?
+  Distributed Block Storage!
+  Right now application_X deploys are dependent on the host (melissa) becuase that is where the storage is.  When K3S is up the location of the storage -should- be
+  irrelevant... then again maybe we should just do "Deploy it anywhere I don't care" deploys if we specifically don't care about persistence of container files.
+- Maybe get a self-hosted TODO app!
+- Look into gitea or gitlab again now that we have our storage solid
