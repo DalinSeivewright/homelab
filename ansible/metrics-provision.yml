@@ -7,6 +7,7 @@
         name: telegraf
       vars:
         telegraf_rpi_stat_collector: "{{'rasbian' in group_names}}"
+        telegraf_docker_stat_collector: "{{'docker_host' in group_names}}"
         telegraf_url: "{{influxdb_url}}"
         telegraf_database: "{{influxdb_database}}"
         telegraf_user: "{{influxdb_user}}"

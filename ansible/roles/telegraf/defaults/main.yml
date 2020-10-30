@@ -1,1 +1,2 @@
 telegraf_rpi_stat_collector: no
+telegraf_docker_stat_collector: no

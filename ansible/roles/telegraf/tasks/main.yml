@@ -23,10 +23,29 @@
     groups: sudo,video
     append: yes
 
+- name: Add docker group to telegraf for docker metrics gathering
+  user:
+    name: telegraf
+    groups: docker
+    append: yes
+  when: "telegraf_docker_stat_collector"
+
+- name: Install lm-sensors
+  apt:
+    pkg:
+      - lm-sensors
+    state: latest
+  when: "not telegraf_rpi_stat_collector"
+
+- name: Run sensors-detect
+  shell: "yes \"\" | sensors-detect"
+  when: "not telegraf_rpi_stat_collector and telegraf_initialize_sensors | default(False)"
+
 - name: Get Raspberry Stats Collection Script
   get_url:
     url: https://raw.githubusercontent.com/robcowart/raspberry_pi_stats/master/rpi-stats.sh
     dest: /usr/local/bin/rpi-stats.sh
+  when: "telegraf_rpi_stat_collector"
 
 - name: Set ownership of script to telegraf user
   file:
