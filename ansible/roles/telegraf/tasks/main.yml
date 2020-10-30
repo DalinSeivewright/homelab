@@ -39,7 +39,7 @@
 
 - name: Run sensors-detect
   shell: "yes \"\" | sensors-detect"
-  when: "not telegraf_rpi_stat_collector and telegraf_initialize_sensors | default(False)"
+  when: "not telegraf_rpi_stat_collector and telegraf_initialize_sensors"
 
 - name: Get Raspberry Stats Collection Script
   get_url:
