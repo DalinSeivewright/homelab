@@ -42,6 +42,13 @@ rpi-3-03
 rpi-3-04
 rpi-4-05
 
+[rpi_cluster]
+inclement-monitor
+eternal-spring
+endless-summer
+enduring-fall
+deep-winter
+
 [telegraf]
 auntie-dot
 melissa
