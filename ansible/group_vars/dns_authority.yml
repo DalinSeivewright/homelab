@@ -54,7 +54,7 @@ dns_forward_zones:
           host: 206
         - name: music
           host: 206
-        - name: omada-controler
+        - name: omada
           host: 244
 
 dns_reverse_zones:
