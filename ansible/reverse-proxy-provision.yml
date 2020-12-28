@@ -37,8 +37,8 @@
       dest: "{{ [docker_volume_path, 'nginx-compose.yml'] | path_join }}"
       mode: u+r
     vars:
-      data_root: "{{ [docker_volume_path, 'data'] | path_join }}"
-    notify: Restart Reverse Proxy
+      data_root: "{{ docker_volume_data_path }}"
+    notify: nginx reverse proxy | restart
 
   - name: Create Certs folder for Reverse Proxy Project
     connection: local
@@ -46,7 +46,7 @@
     file:
       path: /tmp/nginx-reverse-proxy/config/ssl/certs
       state: directory
-    notify: Restart Reverse Proxy
+    notify: nginx reverse proxy | restart
 
   - name: Generate dhparam
     connection: local
@@ -54,7 +54,7 @@
     openssl_dhparam:
       path: /tmp/nginx-reverse-proxy/config/ssl/certs/dhparam.pem
       size: 4096
-    notify: Restart Reverse Proxy
+    notify: nginx reverse proxy | restart
 
   - name: Create Default site cert folder for Reverse Proxy Project
     connection: local
@@ -62,7 +62,7 @@
     file:
       path: /tmp/nginx-reverse-proxy/config/ssl/certs/default
       state: directory
-    notify: Restart Reverse Proxy
+    notify: nginx reverse proxy | restart
 
   - name: Generate private key
     connection: local
@@ -71,7 +71,7 @@
       path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.key
       size: 4096
       type: RSA
-    notify: Restart Reverse Proxy
+    notify: nginx reverse proxy | restart
 
   - name: Generate CSR
     connection: local
@@ -80,7 +80,7 @@
       path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.csr
       privatekey_path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.key
       common_name: default
-    notify: Restart Reverse Proxy
+    notify: nginx reverse proxy | restart
 
   - name: Generate Default Certs
     connection: local
@@ -91,23 +91,25 @@
       privatekey_path: /tmp/nginx-reverse-proxy/config/ssl/certs/default/default-selfsigned.key
       provider: selfsigned
       selfsigned_not_after: "{{ ssl_cert_expire_date }}"
-    notify: Restart Reverse Proxy
+    notify: nginx reverse proxy | restart
 
   - name: Synchronize Required Files
     synchronize:
       src: /tmp/nginx-reverse-proxy/config
-      dest: "{{ [docker_volume_path, 'data'] | path_join }}"
+      dest: "{{ docker_volume_data_path }}"
       delete: no
       owner: no
       group: no
-    notify: Restart Reverse Proxy
+    notify: nginx reverse proxy | restart
 
   - name: Change ownerships to docker container user (whoever decided not to accept UID and GID with file needs to be reprimanded)
-    command: "chown -R {{ (docker_subuid_start.stdout | int) + docker_container_user_uid }}:{{ (docker_subuid_start.stdout | int) + docker_container_user_uid }} {{ [docker_volume_path, 'data'] | path_join | quote }}"
+    command: "chown -R {{ (docker_subuid_start.stdout | int) + docker_container_user_uid }}:{{ (docker_subuid_start.stdout | int) + docker_container_user_gid }} {{ docker_volume_data_path | quote }}"
 
   - name: Create Docker Internal Proxy Network
     command: "docker network create internal-proxy"
-    notify: Restart Reverse Proxy
+    register: commandResult
+    failed_when: " commandResult.rc != 0 and 'already exists' not in commandResult.stderr "
+    notify: nginx reverse proxy | restart
 
   - name: Open UFW HTTP/S Ports
     include_role:
@@ -118,10 +120,11 @@
         - '443'
 
   handlers:
-    - name: Restart Reverse Proxy
+    - name: nginx reverse proxy | restart
       command: "docker-compose -f {{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}} up -d --force-recreate"
 
   vars:
     docker_volume_path: "{{ [docker_volume_root, reverse_proxy_docker_folder] | path_join }}"
+    docker_volume_data_path: "{{ [docker_volume_path, 'data'] | path_join }}"
     ansible_user: "{{ provision_user }}"
     ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
