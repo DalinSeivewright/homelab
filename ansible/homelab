@@ -1,6 +1,7 @@
 
 [droplet]
 droplet-jellyfin
+offensive-bias
 
 [ubuntu]
 auntie-dot
@@ -15,10 +16,19 @@ melissa
 [docker_host]
 melissa
 droplet-jellyfin
+offensive-bias
+
+[docker_host:children]
+reverse_proxy
+application_registry
 
 [reverse_proxy]
 melissa
 droplet-jellyfin
+offensive-bias
+
+[application_registry]
+offensive-bias
 
 [application_jellyfin]
 melissa

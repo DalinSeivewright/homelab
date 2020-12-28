@@ -1,0 +1,227 @@
+- hosts: "application_registry"
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Check Docker
+    become: yes
+    command: "docker --version"
+    ignore_errors: yes
+    register: docker_result
+    changed_when: False
+
+  - name: Ensure docker host group and docker installed
+    fail:
+      msg: "{{ inventory_hostname }} must be part of the docker_host group and docker-provision.yml must have been run!"
+    when: "'docker_host' not in group_names or docker_result is failed"
+
+  - name: Grab Docker User Subuid Start Range
+    command: "grep -Po 'docker-manager:\\K[0-9]+' /etc/subuid"
+    register: docker_subuid_start
+
+  - name: Clone Registry Repo Project
+    connection: local
+    become: no
+    git:
+      repo : "{{ registry_repo }}"
+      dest : /tmp/application_registry
+      key_file: "{{ansible_ssh_private_key_file}}"
+
+  - name: Create registry docker volume folder
+    file:
+      path: "{{ docker_volume_path }}"
+      state: directory
+    notify: registry | restart
+
+  - name: Create registry docker volume data folder
+    file:
+      path: "{{ docker_volume_data_path }}"
+      state: directory
+    notify: registry | restart
+
+  - name: Create Config
+    template:
+      src: /tmp/application_registry/docker/registry-compose.yml.j2
+      dest: "{{ [docker_volume_path, 'registry-compose.yml'] | path_join }}"
+      mode: u+r
+    vars:
+      expose_ports: "{{ inventory_hostname != registry_reverse_proxy_host }}"
+    notify:
+      - registry | restart
+
+  - name: Change ownerships to docker container user (whoever decided not to accept UID and GID with file needs to be reprimanded)
+    command: "chown -R {{ (docker_subuid_start.stdout | int) + docker_container_user_uid }}:{{ (docker_subuid_start.stdout | int) + docker_container_user_gid }} {{ docker_volume_data_path | quote }}"
+    notify:
+      - registry | restart
+
+  - name: Reverse Proxy ensure site folder creation
+    file:
+      path: "{{ docker_reverse_proxy_site_path}}"
+      state: directory
+    delegate_to: "{{ registry_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Reverse Proxy ensure certs folder creation
+    file:
+      path: "{{ docker_reverse_proxy_cert_path }}"
+      state: directory
+    delegate_to: "{{ registry_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Create Certbot Cert
+    include_role:
+      name: reverse_proxy_certbot
+      apply:
+        delegate_to: "{{ registry_reverse_proxy_host }}"
+    vars:
+      reverse_proxy_certbot_config_path: "{{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}}"
+      reverse_proxy_certbot_domain: "{{registry_reverse_proxy_server_name}}"
+      reverse_proxy_certbot_renew: no
+    when: not registry_self_signed_certs
+
+  - name: Copy Private Key
+    copy:
+      src: "/etc/letsencrypt/live/{{registry_reverse_proxy_server_name}}/privkey.pem"
+      dest: "{{certbot_key_path}}"
+      remote_src: yes
+    when: not registry_self_signed_certs
+    delegate_to: "{{ registry_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Copy Cert
+    copy:
+      src: "/etc/letsencrypt/live/{{registry_reverse_proxy_server_name}}/fullchain.pem"
+      dest: "{{certbot_cert_path}}"
+      remote_src: yes
+    when: not registry_self_signed_certs
+    delegate_to: "{{ registry_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Reverse Proxy Create Site Config
+    template:
+      src: /tmp/application_registry/reverse_proxy/registry.conf.j2
+      dest: "{{ [docker_reverse_proxy_site_path, 'registry.conf'] | path_join }}"
+      mode: u+r
+    vars:
+      proxy_target: "{{'registry' if inventory_hostname == registry_reverse_proxy_host else inventory_hostname}}"
+      registry_private_key_path: "{{ssl_key_path_in_container if registry_self_signed_certs else certbot_key_path_in_container}}"
+      registry_public_cert_path: "{{ssl_crt_path_in_container if registry_self_signed_certs else certbot_cert_path_in_container}}"
+    delegate_to: "{{ registry_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Reverse Proxy Chown proxy files
+    command: "chown -R {{ (docker_subuid_start.stdout | int) + docker_container_user_uid }}:{{ (docker_subuid_start.stdout | int) + docker_container_user_uid }} {{ docker_reverse_proxy_volume_path | quote }}"
+    delegate_to: "{{ registry_reverse_proxy_host }}"
+
+  # REGISTRY UI OMG THIS IS HORRIBLE NEED TO CLEAN THIS UP DO NOT JUDGE ME
+  # I promise to clean everything up after I get the registry and build server up
+  - name: Reverse UI Proxy ensure site folder creation
+    file:
+      path: "{{ docker_reverse_proxy_site_path}}"
+      state: directory
+    delegate_to: "{{ registry_ui_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Reverse UI Proxy ensure certs folder creation
+    file:
+      path: "{{ docker_reverse_ui_proxy_cert_path }}"
+      state: directory
+    delegate_to: "{{ registry_ui_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Create Certbot Cert for Registry UI
+    include_role:
+      name: reverse_proxy_certbot
+      apply:
+        delegate_to: "{{ registry_ui_reverse_proxy_host }}"
+    vars:
+      reverse_proxy_certbot_config_path: "{{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}}"
+      reverse_proxy_certbot_domain: "{{registry_ui_reverse_proxy_server_name}}"
+      reverse_proxy_certbot_renew: no
+    when: not registry_ui_self_signed_certs
+
+  - name: Copy Private Key
+    copy:
+      src: "/etc/letsencrypt/live/{{registry_ui_reverse_proxy_server_name}}/privkey.pem"
+      dest: "{{ui_certbot_key_path}}"
+      remote_src: yes
+    when: not registry_ui_self_signed_certs
+    delegate_to: "{{ registry_ui_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Copy Cert
+    copy:
+      src: "/etc/letsencrypt/live/{{registry_ui_reverse_proxy_server_name}}/fullchain.pem"
+      dest: "{{ui_certbot_cert_path}}"
+      remote_src: yes
+    when: not registry_self_signed_certs
+    delegate_to: "{{ registry_ui_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Reverse Proxy Create Site Config
+    template:
+      src: /tmp/application_registry/reverse_proxy/registry-ui.conf.j2
+      dest: "{{ [docker_reverse_ui_proxy_site_path, 'registry-ui.conf'] | path_join }}"
+      mode: u+r
+    vars:
+      proxy_target: "{{'registry-ui' if inventory_hostname == registry_reverse_proxy_host else inventory_hostname}}"
+      registry_ui_private_key_path: "{{ssl_key_path_in_container if registry_ui_self_signed_certs else ui_certbot_key_path_in_container}}"
+      registry_ui_public_cert_path: "{{ssl_crt_path_in_container if registry_ui_self_signed_certs else ui_certbot_cert_path_in_container}}"
+    delegate_to: "{{ registry_ui_reverse_proxy_host }}"
+    notify:
+      - nginx reverse proxy | restart
+      - registry | restart
+
+  - name: Reverse Proxy Chown proxy files
+    command: "chown -R {{ (docker_subuid_start.stdout | int) + docker_container_user_uid }}:{{ (docker_subuid_start.stdout | int) + docker_container_user_uid }} {{ docker_reverse_ui_proxy_volume_path | quote }}"
+    delegate_to: "{{ registry_ui_reverse_proxy_host }}"
+
+  handlers:
+    - name: nginx reverse proxy | restart
+      command: "docker-compose -f {{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}} up -d --force-recreate"
+      delegate_to: "{{ registry_reverse_proxy_host }}"
+    - name: registry | restart
+      command: "docker-compose -f {{[docker_volume_path, 'registry-compose.yml'] | path_join | quote}} up -d --force-recreate"
+  vars:
+    # TODO CLEAN THIS SHIT UP GAHH  GENERIZE and turn into a role for the love of all that is good
+    docker_volume_path: "{{ [docker_volume_root, registry_docker_folder] | path_join }}"
+    docker_volume_data_path: "{{ [docker_volume_path, 'docker_data'] | path_join }}"
+    registry_container_site_path: "{{['/data/config/sites', registry_reverse_proxy_site_name] | path_join}}"
+    registry_container_site_cert_path: "{{['/data/config/sites', registry_reverse_proxy_site_name, 'certs'] | path_join}}"
+    docker_reverse_proxy_volume_path: "{{ [docker_volume_root, reverse_proxy_docker_folder, 'data'] | path_join }}"
+    docker_reverse_proxy_site_path: "{{[docker_reverse_proxy_volume_path, 'sites', registry_reverse_proxy_site_name] | path_join}}"
+    docker_reverse_proxy_cert_path: "{{[docker_reverse_proxy_site_path, 'certs'] | path_join}}"
+    certbot_key_path: "{{[docker_reverse_proxy_cert_path, registry_reverse_proxy_site_name + '-privkey.pem'] | path_join}}"
+    certbot_cert_path: "{{[docker_reverse_proxy_cert_path, registry_reverse_proxy_site_name + '-fullchain.pem'] | path_join}}"
+    certbot_key_path_in_container: "{{[registry_container_site_cert_path, registry_reverse_proxy_site_name + '-privkey.pem'] | path_join}}"
+    certbot_cert_path_in_container: "{{[registry_container_site_cert_path, registry_reverse_proxy_site_name + '-fullchain.pem'] | path_join}}"
+
+    registry_ui_container_site_path: "{{['/data/config/sites', registry_ui_reverse_proxy_site_name] | path_join}}"
+    registry_ui_container_site_cert_path: "{{['/data/config/sites', registry_ui_reverse_proxy_site_name, 'certs'] | path_join}}"
+    docker_reverse_ui_proxy_volume_path: "{{ [docker_volume_root, reverse_proxy_docker_folder, 'data'] | path_join }}"
+    docker_reverse_ui_proxy_site_path: "{{[docker_reverse_ui_proxy_volume_path, 'sites', registry_ui_reverse_proxy_site_name] | path_join}}"
+    docker_reverse_ui_proxy_cert_path: "{{[docker_reverse_ui_proxy_site_path, 'certs'] | path_join}}"
+    ui_certbot_key_path: "{{[docker_reverse_ui_proxy_cert_path, registry_ui_reverse_proxy_site_name + '-privkey.pem'] | path_join}}"
+    ui_certbot_cert_path: "{{[docker_reverse_ui_proxy_cert_path, registry_ui_reverse_proxy_site_name + '-fullchain.pem'] | path_join}}"
+    ui_certbot_key_path_in_container: "{{[registry_ui_container_site_cert_path, registry_ui_reverse_proxy_site_name + '-privkey.pem'] | path_join}}"
+    ui_certbot_cert_path_in_container: "{{[registry_ui_container_site_cert_path, registry_ui_reverse_proxy_site_name + '-fullchain.pem'] | path_join}}"
+
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

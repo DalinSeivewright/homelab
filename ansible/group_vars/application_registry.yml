@@ -1,0 +1,2 @@
+registry_docker_folder: registry
+registry_repo: git@github.com:DalinSeivewright/application_registry.git
