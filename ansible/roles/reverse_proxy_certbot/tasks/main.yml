@@ -10,8 +10,8 @@
   include_role:
     name: certbot_ssl_cert
   vars:
-    certbot_domain: "{{reverse_proxy_certbot_domain}}"
-    certbot_renew: no
+    certbot_ssl_cert_domain: "{{reverse_proxy_certbot_domain}}"
+    certbot_ssl_cert_renew: no
   when: not cert_stat_reverse_proxy_certbot.stat.exists
 
 - name: Create Cert if it does not exist
