@@ -1,0 +1,38 @@
+- hosts: "application_jellyfin:&droplet"
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: test
+    debug:
+      var: docker_reverse_proxy_site_path
+  - name: Stop Reverse Proxy
+    command: "docker-compose -f {{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}} stop"
+
+  # - name: Renew Certbot Cert
+  #   include_role:
+  #     name: certbot_ssl_cert
+  #   vars:
+  #     certbot_ssl_cert_renew: yes
+
+  - name: Copy Private Key
+    copy:
+      src: "/etc/letsencrypt/live/{{jellyfin_reverse_proxy_server_name}}/privkey.pem"
+      dest: "{{certbot_key_path}}"
+      remote_src: yes
+
+  - name: Copy Cert
+    copy:
+      src: "/etc/letsencrypt/live/{{jellyfin_reverse_proxy_server_name}}/fullchain.pem"
+      dest: "{{certbot_cert_path}}"
+      remote_src: yes
+
+  - name: Start Reverse Proxy
+    command: "docker-compose -f {{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}} start"
+  vars:
+    certbot_key_path: "{{[docker_reverse_proxy_cert_path, jellyfin_reverse_proxy_site_name + '-privkey.pem'] | path_join}}"
+    certbot_cert_path: "{{[docker_reverse_proxy_cert_path, jellyfin_reverse_proxy_site_name + '-fullchain.pem'] | path_join}}"
+    docker_reverse_proxy_volume_path: "{{ [docker_volume_root, reverse_proxy_docker_folder, 'data'] | path_join }}"
+    docker_reverse_proxy_site_path: "{{[docker_reverse_proxy_volume_path, 'sites', jellyfin_reverse_proxy_site_name] | path_join}}"
+    docker_reverse_proxy_cert_path: "{{[docker_reverse_proxy_site_path, 'certs'] | path_join}}"
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"
