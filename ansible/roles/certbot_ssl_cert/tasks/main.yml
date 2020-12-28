@@ -1,8 +1,13 @@
 - name: Add Certbot PPA
   apt_repository:
     repo: ppa:certbot/certbot
-    update_cache: yes
+    update_cache: no
     state: present
+
+- name: Update
+  apt:
+    update_cache: yes
+    cache_valid_time: 0
 
 - name: Install Certbot
   apt:
