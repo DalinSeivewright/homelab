@@ -6,6 +6,10 @@
 #     force_apt_get: yes
 #     update_cache: no
 #   when: installing
+# TODO
+# FIX Docker Compose Install (APT pacahges it with a bad dep)
+#sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+#sudo chmod +x /usr/local/bin/docker-compose
 
 - name: Add Docker Key
   apt_key:
@@ -21,7 +25,6 @@
   apt:
     pkg:
     - docker-ce
-    - docker-compose
     state: latest
     force_apt_get: yes
     update_cache: yes
