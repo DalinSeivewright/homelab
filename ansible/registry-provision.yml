@@ -80,6 +80,7 @@
       reverse_proxy_certbot_config_path: "{{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}}"
       reverse_proxy_certbot_domain: "{{registry_reverse_proxy_server_name}}"
       reverse_proxy_certbot_renew: no
+      reverse_proxy_certbot_email: "{{ homelab_email }}"
     when: not registry_self_signed_certs
 
   - name: Copy Private Key
@@ -151,6 +152,7 @@
       reverse_proxy_certbot_config_path: "{{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}}"
       reverse_proxy_certbot_domain: "{{registry_ui_reverse_proxy_server_name}}"
       reverse_proxy_certbot_renew: no
+      reverse_proxy_certbot_email: "{{ homelab_email }}"
     when: not registry_ui_self_signed_certs
 
   - name: Copy Private Key

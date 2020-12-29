@@ -15,14 +15,8 @@
       - certbot
     state: latest
 
-- name: Grab Cert Props
-  include_vars:
-    file: ../../../vars/certbot.yml
-    name: certbot
-  when: not certbot_ssl_cert_renew
-
 - name: Generate Cert
-  command: "certbot certonly --standalone --non-interactive --agree-tos -m {{certbot.certbot_email}} -d {{certbot_ssl_cert_domain}}"
+  command: "certbot certonly --standalone --non-interactive --agree-tos -m {{certbot_email}} -d {{certbot_ssl_cert_domain}}"
   when: not certbot_ssl_cert_renew
 
 - name: Renew Certs

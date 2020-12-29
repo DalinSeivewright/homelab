@@ -12,6 +12,7 @@
   vars:
     certbot_ssl_cert_domain: "{{reverse_proxy_certbot_domain}}"
     certbot_ssl_cert_renew: no
+    certbot_ssl_cert_email: "{{reverse_proxy_certbot_email}}"
   when: not cert_stat_reverse_proxy_certbot.stat.exists
 
 - name: Create Cert if it does not exist
@@ -20,6 +21,7 @@
   vars:
     certbot_ssl_cert_domain: "{{reverse_proxy_certbot_domain}}"
     certbot_ssl_cert_renew: yes
+    certbot_ssl_cert_email: "{{reverse_proxy_certbot_email}}"
   when: cert_stat_reverse_proxy_certbot.stat.exists and reverse_proxy_certbot_renew
 
 - name: Turn On Reverse Proxy

@@ -1,0 +1,7 @@
+# Technically Ubuntu
+ansible_python_interpreter: /usr/bin/python3
+default_user: root
+
+digital_ocean_api_token: "{{ vault_digital_ocean_api_token }}"
+droplets: "{{ vault_droplets }}"
+firewalls: "{{vault_firewalls }}"

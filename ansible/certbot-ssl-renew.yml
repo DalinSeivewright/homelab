@@ -8,11 +8,12 @@
   - name: Stop Reverse Proxy
     command: "docker-compose -f {{[docker_volume_root, reverse_proxy_docker_folder, 'nginx-compose.yml'] | path_join | quote}} stop"
 
-  # - name: Renew Certbot Cert
-  #   include_role:
-  #     name: certbot_ssl_cert
-  #   vars:
-  #     certbot_ssl_cert_renew: yes
+  - name: Renew Certbot Cert
+    include_role:
+      name: certbot_ssl_cert
+    vars:
+      certbot_email: "{{homelab_email}}"
+      certbot_ssl_cert_renew: yes
 
   - name: Copy Private Key
     copy:

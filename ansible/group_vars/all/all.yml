@@ -45,3 +45,4 @@ share_users:
     gid: 4004
 
 ssl_cert_expire_date: 20211008000000Z
+homelab_email: "{{ vault_homelab_email }}"
