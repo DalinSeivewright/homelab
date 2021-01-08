@@ -1,2 +1,34 @@
 registry_docker_folder: registry
 registry_repo: git@github.com:DalinSeivewright/application_registry.git
+
+registry_reverse_proxy_server_name: registry.logichromatic.ca
+registry_reverse_proxy_host: offensive-bias
+registry_reverse_proxy_site_name: registry
+registry_self_signed_certs: no
+
+registry_ui_reverse_proxy_server_name: registry-ui.logichromatic.ca
+registry_ui_reverse_proxy_host: offensive-bias
+registry_ui_reverse_proxy_site_name: registry-ui
+registry_ui_self_signed_certs: no
+
+
+application_registry_config:
+  friendly_name: registry
+  repo: git@github.com:DalinSeivewright/application_registry.git
+  containers:
+    registry:
+      uid: 0
+      gid: 0
+      proxy:
+        server: registry.logichromatic.ca
+        delegate_host: offensive-bias
+        container_port: "5000"
+        self_signed: no
+    registry-ui:
+      uid: 0
+      gid: 0
+      proxy:
+        server: registry-ui.logichromatic.ca
+        delegate_host: offensive-bias
+        container_port: "80"
+        self_signed: no

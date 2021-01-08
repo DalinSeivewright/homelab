@@ -4,5 +4,6 @@ docker_group: docker-manager
 docker_gid: 6000
 
 docker_volume_root: /home/{{provision_user}}
+docker_data_folder: docker_data
 docker_container_user_uid: 0
 docker_container_user_gid: 0

@@ -1,0 +1,14 @@
+# TODO maybe pass in the docker user eventually?
+
+- name: Ensure docker host group and docker installed
+  fail:
+    msg: "{{ inventory_hostname }} must be part of the docker_host group and docker-provision.yml must have been run!"
+  when: "'docker_host' not in group_names"
+
+- name: Grab Docker User Subuid Start Range
+  command: "grep -Po 'docker-manager:\\K[0-9]+' /etc/subuid"
+  register: docker_sub_id_uid
+
+- name: Grab Docker User Subgid Start Range
+  command: "grep -Po 'docker-manager:\\K[0-9]+' /etc/subgid"
+  register: docker_sub_id_gid

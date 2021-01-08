@@ -1,0 +1,2 @@
+docker_data_folder_root: docker_data
+docker_app_volume_data_root: "{{ [docker_app_volume_root, docker_data_folder_root] | path_join }}"

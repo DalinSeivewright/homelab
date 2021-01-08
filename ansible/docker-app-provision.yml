@@ -1,0 +1,56 @@
+- hosts: "{{application_target | mandatory}}:&docker_host"
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: Yay
+    debug:
+      var: config
+
+  - name: Clone Application Repo
+    connection: local
+    become: no
+    git:
+      repo : "{{docker_app_git_repo}}"
+      dest : "{{docker_app_git_root}}"
+      key_file: "{{ansible_ssh_private_key_file}}"
+
+# BEGIN DOCKER APP SPECIFIC
+  - name: Deploy Docker Application
+    include_role:
+      name: docker_app
+    vars:
+      docker_app_volume_root: "{{ [docker_volume_root, application_target] | path_join }}"
+      docker_app_project_root: "{{docker_app_git_root}}"
+      docker_app_name: "{{config.friendly_name}}"
+      docker_app_containers: "{{config.containers}}"
+# END DOCKER APP SPECIFIC
+
+
+# BEGIN REVERSE PROXY SPECIFIC
+  - name: Deploy Nginx Proxy for Docker Application
+    include_role:
+      name: docker_app_proxy
+    vars:
+      docker_app_proxy_docker_root: "{{ [hostvars[item.value.proxy.delegate_host].docker_volume_root, hostvars[item.value.proxy.delegate_host].reverse_proxy_docker_folder] | path_join }}"
+      docker_app_proxy_uid: "{{ hostvars[item.value.proxy.delegate_host].reverse_proxy_container_uid | int }}"
+      docker_app_proxy_gid: "{{ hostvars[item.value.proxy.delegate_host].reverse_proxy_container_gid | int }}"
+      docker_app_proxy_project_root: "{{docker_app_git_root}}"
+      docker_app_proxy_name: "{{ item.key }}"
+      docker_app_proxy_domain: "{{ item.value.proxy.server }}"
+      docker_app_proxy_delegate_host: "{{item.value.proxy.delegate_host}}"
+      docker_app_proxy_container_port: "{{item.value.proxy.container_port}}"
+      docker_app_proxy_self_signed: "{{item.value.proxy.self_signed}}"
+      docker_app_proxy_cert_bot_email: "{{ homelab_email }}"
+    with_dict: "{{ config.containers }}"
+    when: item.value.proxy is defined
+
+# END REVERSE PROXY SPECIFIC
+
+  vars:
+    config_key: "{{application_target}}_config"
+    config: "{{ hostvars[inventory_hostname][config_key] }}"
+    docker_app_git_repo: "{{ config.repo }}"
+    docker_app_git_root: "/tmp/{{application_target}}"
+
+    ansible_user: "{{ provision_user }}"
+    ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

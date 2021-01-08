@@ -1,0 +1,2 @@
+- name: docker application | restart
+  command: "docker-compose -f {{[docker_app_volume_root, docker_app_name + '-compose.yml'] | path_join | quote}} up -d --force-recreate"

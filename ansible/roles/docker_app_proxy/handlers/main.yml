@@ -1,0 +1,2 @@
+- name: nginx reverse proxy | restart
+  command: "docker-compose -f {{[docker_app_proxy_docker_root, 'nginx-compose.yml'] | path_join | quote}} up -d --force-recreate"

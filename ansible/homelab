@@ -21,6 +21,9 @@ offensive-bias
 [docker_host:children]
 reverse_proxy
 application_registry
+application_jellyfin
+application_omada
+application_tick
 
 [reverse_proxy]
 melissa

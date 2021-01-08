@@ -1,12 +1,3 @@
 ansible_host: 159.89.113.201
-registry_reverse_proxy_server_name: registry.logichromatic.ca
-registry_reverse_proxy_host: offensive-bias
-registry_reverse_proxy_site_name: registry
-registry_self_signed_certs: no
-
-registry_ui_reverse_proxy_server_name: registry-ui.logichromatic.ca
-registry_ui_reverse_proxy_host: offensive-bias
-registry_ui_reverse_proxy_site_name: registry-ui
-registry_ui_self_signed_certs: no
 
 docker_volume_root: /mnt/volume_tor1_02/docker_volumes

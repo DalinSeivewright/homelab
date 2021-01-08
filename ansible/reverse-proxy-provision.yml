@@ -125,6 +125,6 @@
 
   vars:
     docker_volume_path: "{{ [docker_volume_root, reverse_proxy_docker_folder] | path_join }}"
-    docker_volume_data_path: "{{ [docker_volume_path, 'data'] | path_join }}"
+    docker_volume_data_path: "{{ [docker_volume_path, 'docker_data'] | path_join }}"
     ansible_user: "{{ provision_user }}"
     ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

@@ -1,0 +1,12 @@
+docker_app_proxy_docker_data_root: "{{ [docker_app_proxy_docker_root, 'docker_data'] | path_join }}"
+
+docker_app_proxy_site_path: "{{[docker_app_proxy_docker_data_root, 'sites', docker_app_proxy_domain] | path_join}}"
+docker_app_proxy_cert_path: "{{[docker_app_proxy_site_path, 'certs'] | path_join}}"
+docker_app_proxy_certbot_key_path: "{{[docker_app_proxy_cert_path, docker_app_proxy_domain + '-privkey.pem'] | path_join}}"
+docker_app_proxy_certbot_cert_path: "{{[docker_app_proxy_cert_path, docker_app_proxy_domain + '-fullchain.pem'] | path_join}}"
+
+
+docker_app_proxy_in_container_site_path: "{{['/data/config/sites', docker_app_proxy_domain] | path_join}}"
+docker_app_proxy_in_container_cert_path: "{{[docker_app_proxy_in_container_site_path, 'certs'] | path_join}}"
+docker_app_proxy_in_container_key_file: "{{ [docker_app_proxy_in_container_cert_path, docker_app_proxy_domain + '-privkey.pem'] | path_join }}"
+docker_app_proxy_in_container_cert_file: "{{ [docker_app_proxy_in_container_cert_path, docker_app_proxy_domain + '-fullchain.pem'] | path_join }}"
