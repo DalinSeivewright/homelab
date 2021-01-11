@@ -49,11 +49,11 @@
 
 - name: Reverse Proxy Create Site Config
   template:
-    src: "{{ [docker_app_proxy_project_root, 'reverse_proxy', docker_app_proxy_name + '.conf.j2'] | path_join }}" #/tmp/application_registry/reverse_proxy/registry.conf.j2
-    dest: "{{ [docker_app_proxy_site_path, docker_app_proxy_name + '.conf'] | path_join }}"
+    src: "{{ [docker_app_proxy_project_root, 'reverse_proxy', docker_app_proxy_container_name + '.conf.j2'] | path_join }}" #/tmp/application_registry/reverse_proxy/registry.conf.j2
+    dest: "{{ [docker_app_proxy_site_path, docker_app_proxy_container_name + '.conf'] | path_join }}"
     mode: u+r
   vars:
-    proxy_target: "{{docker_app_proxy_name if inventory_hostname == docker_app_proxy_delegate_host else inventory_hostname}}"
+    proxy_target: "{{docker_app_proxy_container_name if inventory_hostname == docker_app_proxy_delegate_host else inventory_hostname}}"
     private_key_path: "{{ssl_key_path_in_container if docker_app_proxy_self_signed else docker_app_proxy_in_container_key_file}}"
     public_cert_path: "{{ssl_crt_path_in_container if docker_app_proxy_self_signed else docker_app_proxy_in_container_cert_file}}"
   delegate_to: "{{ docker_app_proxy_delegate_host }}"

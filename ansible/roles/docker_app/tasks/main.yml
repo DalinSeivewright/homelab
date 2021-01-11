@@ -23,11 +23,11 @@
   connection: local
   become: no
   stat:
-    path: "{{ [docker_app_project_root, 'ansible', application_target + '.yml'] | path_join }}"
+    path: "{{ [docker_app_project_root, 'ansible', docker_app_name + '.yml'] | path_join }}"
   register: custom_task_file_stat
 
 - name: Include custom work task file for the docker application
-  include: "{{ [docker_app_project_root, 'ansible', application_target + '.yml'] | path_join }}"
+  include: "{{ [docker_app_project_root, 'ansible', docker_app_name + '.yml'] | path_join }}"
   when: ansible_dir_stat.stat.exists and ansible_dir_stat.stat.isdir and custom_task_file_stat.stat.exists and not custom_task_file_stat.stat.isdir
 
 - name: Generate docker application compose file

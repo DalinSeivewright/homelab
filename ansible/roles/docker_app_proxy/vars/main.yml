@@ -1,4 +1,4 @@
-docker_app_proxy_docker_data_root: "{{ [docker_app_proxy_docker_root, 'docker_data'] | path_join }}"
+docker_app_proxy_docker_data_root: "{{ docker_app_proxy_proxy_container_root }}"
 
 docker_app_proxy_site_path: "{{[docker_app_proxy_docker_data_root, 'sites', docker_app_proxy_domain] | path_join}}"
 docker_app_proxy_cert_path: "{{[docker_app_proxy_site_path, 'certs'] | path_join}}"

@@ -4,3 +4,11 @@ docker_container_user_uid: 911
 docker_container_user_gid: 911
 reverse_proxy_container_uid: 911
 reverse_proxy_container_gid: 911
+
+application_nginx_config:
+  friendly_name: nginx-reverse-proxy
+  repo: git@github.com:DalinSeivewright/application_nginx.git
+  containers:
+    nginx:
+      uid: 911
+      gid: 911

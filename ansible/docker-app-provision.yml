@@ -19,7 +19,7 @@
     include_role:
       name: docker_app
     vars:
-      docker_app_volume_root: "{{ [docker_volume_root, application_target] | path_join }}"
+      docker_app_volume_root: "{{ [docker_volume_root, config.friendly_name] | path_join }}"
       docker_app_project_root: "{{docker_app_git_root}}"
       docker_app_name: "{{config.friendly_name}}"
       docker_app_containers: "{{config.containers}}"
@@ -31,11 +31,14 @@
     include_role:
       name: docker_app_proxy
     vars:
-      docker_app_proxy_docker_root: "{{ [hostvars[item.value.proxy.delegate_host].docker_volume_root, hostvars[item.value.proxy.delegate_host].reverse_proxy_docker_folder] | path_join }}"
+      docker_app_proxy_docker_root: "{{ [hostvars[item.value.proxy.delegate_host].docker_volume_root, hostvars[item.value.proxy.delegate_host].application_nginx_config.friendly_name] | path_join }}"
+      #TODO Not really liking this...
+      docker_app_proxy_proxy_container_root: "{{ [hostvars[item.value.proxy.delegate_host].docker_volume_root, hostvars[item.value.proxy.delegate_host].application_nginx_config.friendly_name, 'docker_data', 'nginx'] | path_join }}"
+      docker_app_proxy_proxy_name: "{{ hostvars[item.value.proxy.delegate_host].application_nginx_config.friendly_name }}"
       docker_app_proxy_uid: "{{ hostvars[item.value.proxy.delegate_host].reverse_proxy_container_uid | int }}"
       docker_app_proxy_gid: "{{ hostvars[item.value.proxy.delegate_host].reverse_proxy_container_gid | int }}"
       docker_app_proxy_project_root: "{{docker_app_git_root}}"
-      docker_app_proxy_name: "{{ item.key }}"
+      docker_app_proxy_container_name: "{{ item.key }}"
       docker_app_proxy_domain: "{{ item.value.proxy.server }}"
       docker_app_proxy_delegate_host: "{{item.value.proxy.delegate_host}}"
       docker_app_proxy_container_port: "{{item.value.proxy.container_port}}"
