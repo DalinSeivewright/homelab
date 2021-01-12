@@ -3,7 +3,7 @@
   file:
     path: "{{ docker_app_proxy_site_path }}"
     state: directory
-  delegate_to: "{{ docker_app_proxy_delegate_host }}"
+  delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   notify:
     - nginx reverse proxy | restart
 
@@ -11,7 +11,7 @@
   file:
     path: "{{ docker_app_proxy_cert_path }}"
     state: directory
-  delegate_to: "{{ docker_app_proxy_delegate_host }}"
+  delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   notify:
     - nginx reverse proxy | restart
 
@@ -19,49 +19,49 @@
   include_role:
     name: reverse_proxy_certbot
     apply:
-      delegate_to: "{{ docker_app_proxy_delegate_host }}"
+      delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   vars:
-    reverse_proxy_certbot_config_path: "{{[docker_app_proxy_docker_root, 'nginx-compose.yml'] | path_join | quote}}"
-    reverse_proxy_certbot_domain: "{{docker_app_proxy_domain}}"
+    reverse_proxy_certbot_compose_file_path: "{{ docker_app_proxy_proxy_compose_file_path | quote}}"
+    reverse_proxy_certbot_domain: "{{docker_app_proxy_app_container_domain}}"
     reverse_proxy_certbot_renew: no
     reverse_proxy_certbot_email: "{{ docker_app_proxy_cert_bot_email }}"
-  when: not docker_app_proxy_self_signed
+  when: not docker_app_proxy_app_container_self_signed_cert
 
 - name: Copy Private Key
   copy:
-    src: "/etc/letsencrypt/live/{{docker_app_proxy_domain}}/privkey.pem"
+    src: "/etc/letsencrypt/live/{{docker_app_proxy_app_container_domain}}/privkey.pem"
     dest: "{{docker_app_proxy_certbot_key_path}}"
     remote_src: yes
-  when: not docker_app_proxy_self_signed
-  delegate_to: "{{ docker_app_proxy_delegate_host }}"
+  when: not docker_app_proxy_app_container_self_signed_cert
+  delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   notify:
     - nginx reverse proxy | restart
 
 - name: Copy Cert
   copy:
-    src: "/etc/letsencrypt/live/{{docker_app_proxy_domain}}/fullchain.pem"
+    src: "/etc/letsencrypt/live/{{docker_app_proxy_app_container_domain}}/fullchain.pem"
     dest: "{{docker_app_proxy_certbot_cert_path}}"
     remote_src: yes
-  when: not docker_app_proxy_self_signed
-  delegate_to: "{{ docker_app_proxy_delegate_host }}"
+  when: not docker_app_proxy_app_container_self_signed_cert
+  delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   notify:
     - nginx reverse proxy | restart
 
 - name: Reverse Proxy Create Site Config
   template:
-    src: "{{ [docker_app_proxy_project_root, 'reverse_proxy', docker_app_proxy_container_name + '.conf.j2'] | path_join }}" #/tmp/application_registry/reverse_proxy/registry.conf.j2
-    dest: "{{ [docker_app_proxy_site_path, docker_app_proxy_container_name + '.conf'] | path_join }}"
+    src: "{{ [docker_app_proxy_app_project_root, 'reverse_proxy', docker_app_proxy_app_container_name + '.conf.j2'] | path_join }}" #/tmp/application_registry/reverse_proxy/registry.conf.j2
+    dest: "{{ [docker_app_proxy_site_path, docker_app_proxy_app_container_name + '.conf'] | path_join }}"
     mode: u+r
   vars:
-    proxy_target: "{{docker_app_proxy_container_name if inventory_hostname == docker_app_proxy_delegate_host else inventory_hostname}}"
-    private_key_path: "{{ssl_key_path_in_container if docker_app_proxy_self_signed else docker_app_proxy_in_container_key_file}}"
-    public_cert_path: "{{ssl_crt_path_in_container if docker_app_proxy_self_signed else docker_app_proxy_in_container_cert_file}}"
-  delegate_to: "{{ docker_app_proxy_delegate_host }}"
+    proxy_target: "{{docker_app_proxy_app_container_name if inventory_hostname == docker_app_proxy_app_container_delegate_host else inventory_hostname}}"
+    private_key_path: "{{ssl_key_path_in_container if docker_app_proxy_app_container_self_signed_cert else docker_app_proxy_in_container_key_file}}"
+    public_cert_path: "{{ssl_crt_path_in_container if docker_app_proxy_app_container_self_signed_cert else docker_app_proxy_in_container_cert_file}}"
+  delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   notify:
     - nginx reverse proxy | restart
 
 - name: Reverse Proxy Chown proxy files
-  command: "chown -R {{ (docker_sub_id_uid.stdout | int) + (docker_app_proxy_uid | int) }}:{{ (docker_sub_id_gid.stdout | int) + (docker_app_proxy_gid | int) }} {{ docker_app_proxy_docker_root | quote }}"
-  delegate_to: "{{ docker_app_proxy_delegate_host }}"
+  command: "chown -R {{ (docker_sub_id_uid.stdout | int) + (docker_app_proxy_proxy_container_uid | int) }}:{{ (docker_sub_id_gid.stdout | int) + (docker_app_proxy_proxy_container_gid | int) }} {{ docker_app_proxy_proxy_docker_root | quote }}"
+  delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   notify:
     - nginx reverse proxy | restart

@@ -1,1 +1,1 @@
-docker_app_proxy_self_signed: no
+docker_app_proxy_app_container_self_signed_cert: no
