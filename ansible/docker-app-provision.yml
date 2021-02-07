@@ -2,6 +2,9 @@
   gather_facts: no
   become: yes
   tasks:
+  - name: Wee
+    debug:
+      var: hostvars[inventory_hostname]
   - name: Yay
     debug:
       var: config
@@ -22,7 +25,7 @@
       docker_app_volume_root: "{{ [docker_volume_root, config.friendly_name] | path_join }}"
       docker_app_project_root: "{{tmp_git_root}}"
       docker_app_name: "{{config.friendly_name}}"
-      docker_app_containers: "{{config.containers}}"
+      docker_app_config: "{{config}}"
 # END DOCKER APP SPECIFIC
 
 
