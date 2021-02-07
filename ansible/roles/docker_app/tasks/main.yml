@@ -8,7 +8,7 @@
     state: directory
   vars:
     container_path: "{{ [docker_app_volume_root, docker_data_folder_root, item.key] | path_join }}"
-  with_dict: "{{docker_app_containers}}"
+  with_dict: "{{docker_app_config.containers}}"
   notify:
     - docker application | restart
 
@@ -30,15 +30,27 @@
   include: "{{ [docker_app_project_root, 'ansible', docker_app_name + '.yml'] | path_join }}"
   when: ansible_dir_stat.stat.exists and ansible_dir_stat.stat.isdir and custom_task_file_stat.stat.exists and not custom_task_file_stat.stat.isdir
 
+# - name: Generate docker application compose file
+#   template:
+#     src: "{{ [docker_app_project_root, 'docker', docker_compose_file_name + '.j2'] | path_join }}"
+#     dest: "{{ [docker_app_volume_root, docker_compose_file_name] | path_join }}"
+#     mode: u+r
+#   vars:
+#     docker_compose_file_name: "{{ docker_app_name + '-compose.yml' }}"
+#   notify:
+#     - docker application | restart
+
 - name: Generate docker application compose file
   template:
-    src: "{{ [docker_app_project_root, 'docker', docker_compose_file_name + '.j2'] | path_join }}"
+    src: templates/compose.yml.j2
     dest: "{{ [docker_app_volume_root, docker_compose_file_name] | path_join }}"
     mode: u+r
+    lstrip_blocks: yes
   vars:
     docker_compose_file_name: "{{ docker_app_name + '-compose.yml' }}"
   notify:
     - docker application | restart
+
 
 - name: Change ownerships to docker app user (whoever decided not to accept UID and GID with file needs to be reprimanded)
   command: "chown -R {{ (docker_sub_id_uid.stdout | int) + (container_uid | int) }}:{{ (docker_sub_id_gid.stdout | int) + (container_gid | int) }} {{ container_path | quote }}"
@@ -46,6 +58,6 @@
     container_path: "{{ [docker_app_volume_root, docker_data_folder_root, item.key] | path_join }}"
     container_uid: "{{ item.value.uid }}"
     container_gid: "{{ item.value.gid }}"
-  with_dict: "{{docker_app_containers}}"
+  with_dict: "{{docker_app_config.containers}}"
   notify:
     - docker application | restart

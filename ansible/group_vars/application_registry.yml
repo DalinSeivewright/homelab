@@ -15,16 +15,35 @@ registry_ui_self_signed_certs: no
 application_registry_config:
   friendly_name: registry
   repo: git@github.com:DalinSeivewright/application_registry.git
+  networks:
+    internal-proxy:
+      type: external
   containers:
     registry:
+      image: registry:latest
+      restart: unless-stopped
+      networks:
+        internal-proxy:
       uid: 0
       gid: 0
+      volumes:
+        - source: data
+          dest: /var/lib/registry
+          relative: yes
       proxy:
         server: registry.logichromatic.ca
         delegate_host: offensive-bias
         container_port: "5000"
         self_signed: no
     registry-ui:
+      image: jc21/registry-ui:latest
+      restart: unless-stopped
+      networks:
+        internal-proxy:
+      environment:
+        NODE_ENV: production
+        REGISTRY_HOST: registry.logichromatic.ca
+        REGISTRY_SSL: 'true'
       uid: 0
       gid: 0
       proxy:

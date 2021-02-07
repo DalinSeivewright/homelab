@@ -1,0 +1,41 @@
+version: "3.3"
+services:
+  {% for container_key, container_values in docker_app_config.containers.items() %}
+  {{container_key}}:
+    image: {{container_values.image}}
+    restart: {{container_values.restart}}
+    {% if container_values.networks is defined %}
+    networks:
+      {% for network_key, network_value in container_values.networks.items() %}
+      {{network_key}}:
+        {% if (docker_app_config.networks[network_key].driver | default('')) == 'macvlan' %}
+        ipv4_address: {{network_value.ip}}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if container_values.volumes is defined %}
+    volumes:
+      {% for volume in container_values.volumes %}
+      - {{ (docker_app_volume_data_root + '/' + container_key + '/' + volume.source) if (volume.relative | default(True)) else volume.source }}:{{volume.dest}}
+      {% endfor %}
+    {% endif %}
+    {% if container_values.environment is defined %}
+    environment:
+      {% for environment_key, environment_value in container_values.environment.items() %}
+      {{environment_key}}: {{'\'' + environment_value + '\'' if environment_value is string else environment_value }}
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% if docker_app_config.networks is defined %}
+networks:
+  {% for network_key, network_value in docker_app_config.networks.items() %}
+  {{network_key}}:
+    {% if network_value.type == 'external' %}
+    external:
+      name: {{network_key}}
+    {% endif %}
+    {% if network_value.type == 'internal' %}
+    {{network_key}}:
+    {% endif %}
+  {% endfor %}
+{% endif %}
