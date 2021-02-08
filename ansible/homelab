@@ -1,3 +1,16 @@
+[local_machines]
+auntie-dot
+melissa
+inclement-monitor
+eternal-spring
+endless-summer
+enduring-fall
+deep-winter
+rpi-2-01
+rpi-2-02
+rpi-3-03
+rpi-3-04
+rpi-4-05
 
 [droplet]
 droplet-jellyfin
