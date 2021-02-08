@@ -30,16 +30,6 @@
   include: "{{ [docker_app_project_root, 'ansible', docker_app_name + '.yml'] | path_join }}"
   when: ansible_dir_stat.stat.exists and ansible_dir_stat.stat.isdir and custom_task_file_stat.stat.exists and not custom_task_file_stat.stat.isdir
 
-# - name: Generate docker application compose file
-#   template:
-#     src: "{{ [docker_app_project_root, 'docker', docker_compose_file_name + '.j2'] | path_join }}"
-#     dest: "{{ [docker_app_volume_root, docker_compose_file_name] | path_join }}"
-#     mode: u+r
-#   vars:
-#     docker_compose_file_name: "{{ docker_app_name + '-compose.yml' }}"
-#   notify:
-#     - docker application | restart
-
 - name: Generate docker application compose file
   template:
     src: templates/compose.yml.j2
@@ -50,7 +40,6 @@
     docker_compose_file_name: "{{ docker_app_name + '-compose.yml' }}"
   notify:
     - docker application | restart
-
 
 - name: Change ownerships to docker app user (whoever decided not to accept UID and GID with file needs to be reprimanded)
   command: "chown -R {{ (docker_sub_id_uid.stdout | int) + (container_uid | int) }}:{{ (docker_sub_id_gid.stdout | int) + (container_gid | int) }} {{ container_path | quote }}"

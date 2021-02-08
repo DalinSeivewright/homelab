@@ -1,13 +1,3 @@
-omada_docker_folder: omada-controller
-omada_repo: git@github.com:DalinSeivewright/application_omada.git
-
-omada_reverse_proxy_server_name: omada.oni.logichromatic.ca
-omada_reverse_proxy_host: melissa
-omada_reverse_proxy_site_name: omada
-omada_self_signed_certs: yes
-omada_container_macvlan_network: yes
-omada_container_proxy_host: 192.168.1.244
-
 application_omada_config:
   friendly_name: omada
   repo: git@github.com:DalinSeivewright/application_omada.git

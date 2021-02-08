@@ -63,7 +63,6 @@
       - nginx reverse proxy | restart
     self_signed_ssl_cert_delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   when: docker_app_proxy_app_container_self_signed_cert
-
 # END SELF SIGNED
 
 - name: Reverse Proxy Create Site Config

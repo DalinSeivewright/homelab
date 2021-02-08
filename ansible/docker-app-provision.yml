@@ -2,13 +2,6 @@
   gather_facts: no
   become: yes
   tasks:
-  - name: Wee
-    debug:
-      var: hostvars[inventory_hostname]
-  - name: Yay
-    debug:
-      var: config
-
   - name: Clone Application Repo
     connection: local
     become: no
@@ -49,7 +42,6 @@
       docker_app_proxy_cert_bot_email: "{{ homelab_email }}"
     with_dict: "{{ config.containers }}"
     when: item.value.proxy is defined
-
 # END REVERSE PROXY SPECIFIC
 
   vars:
@@ -57,6 +49,5 @@
     config: "{{ hostvars[inventory_hostname][config_key] }}"
     git_repo: "{{ config.repo }}"
     tmp_git_root: "/tmp/{{application_target}}"
-
     ansible_user: "{{ provision_user }}"
     ansible_ssh_private_key_file: "{{ provision_private_key | realpath }}"

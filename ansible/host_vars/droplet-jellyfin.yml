@@ -1,14 +1,5 @@
 ansible_host: 142.93.147.44
 
-jellyfin_extra_mounts:
-  - /mnt/volume_tor1_01/music:/data/music:ro
-jellyfin_reverse_proxy_server_name: music.logichromatic.ca
-jellyfin_reverse_proxy_host: droplet-jellyfin
-jellyfin_reverse_proxy_site_name: music
-jellyfin_self_signed_certs: no
-
-
-
 application_jellyfin_config:
   friendly_name: jellyfin
   repo: git@github.com:DalinSeivewright/application_jellyfin.git
