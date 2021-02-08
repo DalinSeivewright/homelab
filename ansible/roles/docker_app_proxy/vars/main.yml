@@ -6,9 +6,14 @@ docker_app_proxy_site_path: "{{[docker_app_proxy_docker_data_root, 'sites', dock
 docker_app_proxy_cert_path: "{{[docker_app_proxy_site_path, 'certs'] | path_join}}"
 docker_app_proxy_certbot_key_path: "{{[docker_app_proxy_cert_path, docker_app_proxy_app_container_domain + '-privkey.pem'] | path_join}}"
 docker_app_proxy_certbot_cert_path: "{{[docker_app_proxy_cert_path, docker_app_proxy_app_container_domain + '-fullchain.pem'] | path_join}}"
-
+docker_app_proxy_self_signed_ssl_key_path: "{{[docker_app_proxy_cert_path, docker_app_proxy_app_container_domain + '-selfsigned.key'] | path_join}}"
+docker_app_proxy_self_signed_ssl_csr_path: "{{[docker_app_proxy_cert_path, docker_app_proxy_app_container_domain + '-selfsigned.csr'] | path_join}}"
+docker_app_proxy_self_signed_ssl_crt_path: "{{[docker_app_proxy_cert_path, docker_app_proxy_app_container_domain + '-selfsigned.crt'] | path_join}}"
+docker_app_proxy_self_signed_expiry_date: 20211008000000Z
 
 docker_app_proxy_in_container_site_path: "{{['/data/config/sites', docker_app_proxy_app_container_domain] | path_join}}"
 docker_app_proxy_in_container_cert_path: "{{[docker_app_proxy_in_container_site_path, 'certs'] | path_join}}"
 docker_app_proxy_in_container_key_file: "{{ [docker_app_proxy_in_container_cert_path, docker_app_proxy_app_container_domain + '-privkey.pem'] | path_join }}"
 docker_app_proxy_in_container_cert_file: "{{ [docker_app_proxy_in_container_cert_path, docker_app_proxy_app_container_domain + '-fullchain.pem'] | path_join }}"
+docker_app_proxy_in_container_key_self_signed_file: "{{ [docker_app_proxy_in_container_cert_path, docker_app_proxy_app_container_domain + '-selfsigned.key'] | path_join }}"
+docker_app_proxy_in_container_cert_self_signed_file: "{{ [docker_app_proxy_in_container_cert_path, docker_app_proxy_app_container_domain + '-selfsigned.crt'] | path_join }}"

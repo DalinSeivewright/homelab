@@ -56,8 +56,8 @@
   command: "chown -R {{ (docker_sub_id_uid.stdout | int) + (container_uid | int) }}:{{ (docker_sub_id_gid.stdout | int) + (container_gid | int) }} {{ container_path | quote }}"
   vars:
     container_path: "{{ [docker_app_volume_root, docker_data_folder_root, item.key] | path_join }}"
-    container_uid: "{{ item.value.uid }}"
-    container_gid: "{{ item.value.gid }}"
+    container_uid: "{{ item.value.uid | default(0) }}"
+    container_gid: "{{ item.value.gid | default(0) }}"
   with_dict: "{{docker_app_config.containers}}"
   notify:
     - docker application | restart

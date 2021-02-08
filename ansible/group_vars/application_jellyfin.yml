@@ -21,15 +21,33 @@ application_self_signed_certs: yes
 application_jellyfin_config:
   friendly_name: jellyfin
   repo: git@github.com:DalinSeivewright/application_jellyfin.git
+  networks:
+    internal-proxy:
+      type: external
   containers:
     jellyfin:
+      image: linuxserver/jellyfin
+      restart: unless-stopped
+      networks:
+        internal-proxy:
       uid: 911
       gid: 911
-      extra_mounts:
-        - /mnt/md1/shares/music:/data/music:ro
-        - /mnt/md1/shares/movies:/data/movies:ro
-        - /mnt/md1/shares/tv:/data/tv:ro
-        - /mnt/md1/shares/videos:/data/videos:ro
+      volumes:
+        - source: config
+          dest: /config
+          relative: yes
+        - source: /mnt/md1/shares/music
+          dest: /data/music:ro
+          relative: no
+        - source: /mnt/md1/shares/movies
+          dest: /data/movies:ro
+          relative: no
+        - source: /mnt/md1/shares/tv
+          dest: /data/tv:ro
+          relative: no
+        - source: /mnt/md1/shares/videos
+          dest: /data/videos:ro
+          relative: no
       proxy:
         server: music.oni.logichromatic.ca
         delegate_host: melissa

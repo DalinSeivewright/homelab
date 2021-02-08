@@ -20,3 +20,93 @@ docker_volume_service_roots:
   - path: "{{docker_volume_data_path}}/kapacitor"
     uid: 0
     gid: 0
+
+
+application_tick_config:
+  friendly_name: tick
+  repo: git@github.com:DalinSeivewright/application_tick.git
+  networks:
+    internal-proxy:
+      type: external
+  containers:
+    grafana:
+      image: grafana/grafana
+      restart: unless-stopped
+      networks:
+        internal-proxy:
+      ports:
+        - "32773:3000"
+      uid: 472
+      gid: 472
+      volumes:
+        - source: data
+          dest: /var/lib/grafana
+          relative: yes
+      depends_on:
+        - influxdb
+    chronograf:
+      image: chronograf
+      restart: unless-stopped
+      networks:
+        internal-proxy:
+      ports:
+        - "32770:8888"
+      volumes:
+        - source: data
+          dest: /var/lib/chronograf
+          relative: yes
+        - source: share
+          dest: /usr/share/chronograf
+          relative: yes
+      environment:
+        CHRONOGRAF_VERSION: 1.8.4
+        REPORTING_DISABLED: 'true'
+        INFLUXDB_URL: http://influxdb:8086
+        KAPACITOR_URL: http://kapacitor:9092
+        CANNED_PATH: /usr/share/chronograf/canned
+        RESOURCES_PATH: /usr/share/chronograf/resources
+        PROTOBOARDS_PATH: /usr/share/chronograf/protoboards
+      depends_on:
+        - influxdb
+        - kapacitor
+    influxdb:
+      image: influxdb
+      restart: unless-stopped
+      networks:
+        internal-proxy:
+      ports:
+        - "32771:8086"
+      volumes:
+        - source: data
+          dest: /var/lib/influxdb
+          relative: yes
+      environment:
+        # TODO Get a vault for this and set the password properly now that we are done "evaluating"
+        INFLUXDB_VERSION: 1.8.0
+        INFLUXDB_DB: telegraf
+        INFLUXDB_USER_PASSWORD: telegraf
+        INFLUXDB_USER: telegraf
+        INFLUXDB_ADMIN_PASSWORD: tachi
+        INFLUXDB_ADMIN_USER: tachi
+        INFLUXDB_REPORTING_DISABLED: 'true'
+    kapacitor:
+      image: kapacitor
+      restart: unless-stopped
+      networks:
+        internal-proxy:
+      ports:
+        - "32772:9092"
+      volumes:
+        - source: data
+          dest: /var/lib/kapacitor
+          relative: yes
+      environment:
+        KAPACITOR_HOSTNAME: kapacitor
+        KAPACITOR_VERSION: 1.5.6
+        KAPACITOR_REPORTING_ENABLED: 'false'
+        KAPACITOR_INFLUXDB_0_ENABLED: 'true'
+        KAPACITOR_INFLUXDB_0_DEFAULT: 'true'
+        KAPACITOR_INFLUXDB_0_NAME: influxdb
+        KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
+      depends_on:
+        - influxdb

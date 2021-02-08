@@ -13,6 +13,12 @@ services:
         {% endif %}
       {% endfor %}
     {% endif %}
+    {% if container_values.ports is defined %}
+    ports:
+      {% for port in container_values.ports %}
+      - "{{port}}"
+      {% endfor %}
+    {% endif %}
     {% if container_values.volumes is defined %}
     volumes:
       {% for volume in container_values.volumes %}
@@ -23,6 +29,12 @@ services:
     environment:
       {% for environment_key, environment_value in container_values.environment.items() %}
       {{environment_key}}: {{'\'' + environment_value + '\'' if environment_value is string else environment_value }}
+      {% endfor %}
+    {% endif %}
+    {% if container_values.depends_on is defined %}
+    depends_on:
+      {% for service in container_values.depends_on %}
+      - {{service}}
       {% endfor %}
     {% endif %}
   {% endfor %}

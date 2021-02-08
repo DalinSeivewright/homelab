@@ -6,3 +6,32 @@ jellyfin_reverse_proxy_server_name: music.logichromatic.ca
 jellyfin_reverse_proxy_host: droplet-jellyfin
 jellyfin_reverse_proxy_site_name: music
 jellyfin_self_signed_certs: no
+
+
+
+application_jellyfin_config:
+  friendly_name: jellyfin
+  repo: git@github.com:DalinSeivewright/application_jellyfin.git
+  networks:
+    internal-proxy:
+      type: external
+  containers:
+    jellyfin:
+      image: linuxserver/jellyfin
+      restart: unless-stopped
+      networks:
+        internal-proxy:
+      uid: 911
+      gid: 911
+      volumes:
+        - source: config
+          dest: /config
+          relative: yes
+        - source: /mnt/volume_tor1_01/music
+          dest: /data/music:ro
+          relative: no
+      proxy:
+        server: music.logichromatic.ca
+        delegate_host: droplet-jellyfin
+        container_port: "8080"
+        self_signed: no

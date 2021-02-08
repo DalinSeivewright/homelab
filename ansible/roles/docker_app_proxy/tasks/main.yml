@@ -15,6 +15,7 @@
   notify:
     - nginx reverse proxy | restart
 
+# CERTBOT
 - name: Create Certbot Cert
   include_role:
     name: reverse_proxy_certbot
@@ -46,6 +47,24 @@
   delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   notify:
     - nginx reverse proxy | restart
+# END CERT
+
+# SELF SIGNED
+- name: Generate Self Signed Cert
+  include_role:
+    name: self_signed_ssl_cert
+  vars:
+    self_signed_ssl_cert_key_path: "{{docker_app_proxy_self_signed_ssl_key_path}}"
+    self_signed_ssl_cert_csr_path: "{{docker_app_proxy_self_signed_ssl_csr_path}}"
+    self_signed_ssl_cert_crt_path: "{{docker_app_proxy_self_signed_ssl_crt_path}}"
+    self_signed_ssl_cert_expire_date: "{{ docker_app_proxy_self_signed_expiry_date }}"
+    self_signed_ssl_cert_common_name: "{{ docker_app_proxy_app_container_domain }}"
+    self_signed_ssl_cert_notifies:
+      - nginx reverse proxy | restart
+    self_signed_ssl_cert_delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
+  when: docker_app_proxy_app_container_self_signed_cert
+
+# END SELF SIGNED
 
 - name: Reverse Proxy Create Site Config
   template:
@@ -54,8 +73,8 @@
     mode: u+r
   vars:
     proxy_target: "{{docker_app_proxy_app_container_name if inventory_hostname == docker_app_proxy_app_container_delegate_host else inventory_hostname}}"
-    private_key_path: "{{ssl_key_path_in_container if docker_app_proxy_app_container_self_signed_cert else docker_app_proxy_in_container_key_file}}"
-    public_cert_path: "{{ssl_crt_path_in_container if docker_app_proxy_app_container_self_signed_cert else docker_app_proxy_in_container_cert_file}}"
+    private_key_path: "{{docker_app_proxy_in_container_key_self_signed_file if docker_app_proxy_app_container_self_signed_cert else docker_app_proxy_in_container_key_file}}"
+    public_cert_path: "{{docker_app_proxy_in_container_cert_self_signed_file if docker_app_proxy_app_container_self_signed_cert else docker_app_proxy_in_container_cert_file}}"
   delegate_to: "{{ docker_app_proxy_app_container_delegate_host }}"
   notify:
     - nginx reverse proxy | restart

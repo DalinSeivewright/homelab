@@ -8,7 +8,36 @@ reverse_proxy_container_gid: 911
 application_nginx_config:
   friendly_name: nginx-reverse-proxy
   repo: git@github.com:DalinSeivewright/application_nginx.git
+  networks:
+    internal-proxy:
+      type: external
   containers:
     nginx:
+      image: linuxserver/nginx
+      restart: unless-stopped
+      networks:
+        internal-proxy:
       uid: 911
       gid: 911
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - source: config/nginx.conf
+          dest: /config/nginx/nginx.conf
+          relative: yes
+        - source: config/errors
+          dest: /data/config/errors
+          relative: yes
+        - source: config/ssl
+          dest: /data/config/ssl
+          relative: yes
+        - source: config/default
+          dest: /data/config/default
+          relative: yes
+        - source: sites
+          dest: /data/config/sites
+          relative: yes
+        - source: logs
+          dest: /config/log/nginx
+          relative: yes
