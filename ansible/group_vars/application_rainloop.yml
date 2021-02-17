@@ -1,0 +1,22 @@
+application_rainloop_config:
+  friendly_name: rainloop
+  networks:
+    internal-proxy:
+      type: external
+  containers:
+    rainloop:
+      image: hardware/rainloop
+      restart: unless-stopped
+      networks:
+        internal-proxy:
+      ports:
+        - "8888:8888"
+      uid: 991
+      gid: 991
+      environment:
+        LOG_TO_STDOUT: 'true'
+        MEMORY_LIMIT: '1G'
+      volumes:
+        - source: data
+          dest: /rainloop/data
+          relative: yes

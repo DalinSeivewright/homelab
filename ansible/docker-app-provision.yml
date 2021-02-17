@@ -9,6 +9,7 @@
       repo : "{{git_repo}}"
       dest : "{{tmp_git_root}}"
       key_file: "{{ansible_ssh_private_key_file}}"
+    when: config.repo is defined
 
 # BEGIN DOCKER APP SPECIFIC
   - name: Deploy Docker Application

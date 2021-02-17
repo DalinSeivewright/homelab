@@ -37,6 +37,8 @@ application_registry
 application_jellyfin
 application_omada
 application_tick
+application_rainloop
+application_wger
 
 [application_nginx]
 melissa
@@ -54,6 +56,12 @@ droplet-jellyfin
 melissa
 
 [application_tick]
+melissa
+
+[application_rainloop]
+melissa
+
+[application_wger]
 melissa
 
 [rasbian]

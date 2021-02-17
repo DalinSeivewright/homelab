@@ -4,6 +4,9 @@ services:
   {{container_key}}:
     image: {{container_values.image}}
     restart: {{container_values.restart}}
+    {% if container_values.user is defined %}
+    user: "{{container_values.user}}"
+    {% endif %}
     {% if container_values.networks is defined %}
     networks:
       {% for network_key, network_value in container_values.networks.items() %}
@@ -22,7 +25,11 @@ services:
     {% if container_values.volumes is defined %}
     volumes:
       {% for volume in container_values.volumes %}
+      {% if volume.shared | default(False) %}
+      - {{ docker_app_volume_data_root + '/shared/' + volume.source }}:{{volume.dest}}
+      {% else %}
       - {{ (docker_app_volume_data_root + '/' + container_key + '/' + volume.source) if (volume.relative | default(True)) else volume.source }}:{{volume.dest}}
+      {% endif %}
       {% endfor %}
     {% endif %}
     {% if container_values.environment is defined %}

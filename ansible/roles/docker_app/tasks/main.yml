@@ -18,6 +18,7 @@
   stat:
     path: "{{ [docker_app_project_root, 'ansible'] | path_join}}"
   register: ansible_dir_stat
+  when: docker_app_config.repo is defined
 
 - name: Check for custom task file in git repo
   connection: local
@@ -25,10 +26,11 @@
   stat:
     path: "{{ [docker_app_project_root, 'ansible', docker_app_name + '.yml'] | path_join }}"
   register: custom_task_file_stat
+  when: docker_app_config.repo is defined
 
 - name: Include custom work task file for the docker application
   include: "{{ [docker_app_project_root, 'ansible', docker_app_name + '.yml'] | path_join }}"
-  when: ansible_dir_stat.stat.exists and ansible_dir_stat.stat.isdir and custom_task_file_stat.stat.exists and not custom_task_file_stat.stat.isdir
+  when: docker_app_config.repo is defined and ansible_dir_stat.stat.exists and ansible_dir_stat.stat.isdir and custom_task_file_stat.stat.exists and not custom_task_file_stat.stat.isdir
 
 - name: Generate docker application compose file
   template:
@@ -38,6 +40,14 @@
     lstrip_blocks: yes
   vars:
     docker_compose_file_name: "{{ docker_app_name + '-compose.yml' }}"
+  notify:
+    - docker application | restart
+
+- name: Change ownerships of shared volume folder if needed
+  command: "chown -R {{ (docker_sub_id_uid.stdout | int) + (docker_app_config.shared_uid | int) }}:{{ (docker_sub_id_gid.stdout | int) + (docker_app_config.shared_gid | int) }} {{ shared_path | quote }}"
+  vars:
+    shared_path: "{{ [docker_app_volume_root, docker_data_folder_root, 'shared'] | path_join }}"
+  when: docker_app_config.shared_uid
   notify:
     - docker application | restart
 
